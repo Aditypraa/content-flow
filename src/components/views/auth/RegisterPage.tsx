@@ -3,14 +3,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import Logo from "@/components/shared/Logo";
 import { Eye } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 const RegisterPage = () => {
     return (
         <div className="w-[400px] px-4 py-10 bg-white rounded-xl flex flex-col justify-center items-center gap-6">
-            <Logo />
+            {/* Logo */}
+            <div className="flex justify-center mb-2">
+                <Image
+                    src="/Logo.svg"
+                    alt="Logo"
+                    width={134}
+                    height={24}
+                    priority
+                    className="h-6 w-auto"
+                />
+            </div>
 
             <div className="w-full flex flex-col gap-3">
                 <div className="flex flex-col gap-1">

@@ -2,20 +2,13 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
-import { Search, Plus, ChevronDown, Eye, Edit, Trash2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Plus, Edit, Trash2, Eye } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import AdminLayout from '@/components/layouts/AdminLayout';
+import SearchInput from '@/components/shared/SearchInput';
 import Pagination from '@/components/shared/Pagination';
 
 interface Article {
@@ -127,98 +120,177 @@ export default function ArticleAdminPage() {
     return (
         <AdminLayout activeMenu="articles" title="Articles">
             {/* Main Content */}
-            <div className="px-6 pt-6 flex justify-center">
-                <div className="w-[1097px] bg-white rounded-xl border border-slate-200 flex flex-col justify-start items-start overflow-hidden">
-                    {/* Header with controls */}
-                    <div className="self-stretch px-4 py-6 bg-gray-50 border-b border-slate-200 flex justify-between items-center gap-4">
-                        <div className="flex items-center gap-4 flex-1">
-                            <div className="w-[287px] h-10 relative">
-                                <Input
-                                    type="text"
-                                    placeholder="Search articles..."
+            <div className="p-4 lg:px-6 lg:pt-6">
+                <div className="w-full max-w-none lg:max-w-[1097px] lg:mx-auto bg-white rounded-xl border border-slate-200 flex flex-col justify-start items-start overflow-hidden">
+
+                    {/* Header with Total Articles and controls */}
+                    <div className="w-full p-6 bg-gray-50 border-b border-slate-200 flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
+                        {/* Total Articles */}
+                        <div className="text-slate-800 text-base font-medium">Total Articles : {filteredArticles.length}</div>
+
+                        {/* Controls */}
+                        <div className="flex flex-col sm:flex-row justify-start items-start sm:items-center gap-2 lg:gap-4">
+                            <div className="flex justify-start items-center gap-2">
+                                <Select>
+                                    <SelectTrigger className="h-9 px-3 bg-white border border-slate-200 flex items-center gap-1.5">
+                                        <SelectValue placeholder="Category" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All Categories</SelectItem>
+                                        <SelectItem value="technology">Technology</SelectItem>
+                                        <SelectItem value="design">Design</SelectItem>
+                                    </SelectContent>
+                                </Select>
+
+                                <SearchInput
+                                    placeholder="Search by title"
                                     value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full h-full pr-10 bg-white border border-slate-200 rounded-md"
+                                    onChange={setSearchTerm}
+                                    className="w-60"
+                                    showClearButton={false}
                                 />
-                                <Search className="w-5 h-5 absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
                             </div>
 
-                            <Select>
-                                <SelectTrigger className="w-[120px] h-10 bg-white border border-slate-200">
-                                    <SelectValue placeholder="Filter" />
-                                    <ChevronDown className="w-5 h-5" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Categories</SelectItem>
-                                    <SelectItem value="technology">Technology</SelectItem>
-                                    <SelectItem value="design">Design</SelectItem>
-                                </SelectContent>
-                            </Select>
+                            <Link href="/admin/articles/create">
+                                <Button className="h-10 px-4 bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1.5">
+                                    <Plus className="w-5 h-5" />
+                                    Add Articles
+                                </Button>
+                            </Link>
                         </div>
-
-                        <Link href="/admin/articles/create">
-                            <Button className="h-10 px-4 bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2">
-                                <Plus className="w-5 h-5" />
-                                Create Article
-                            </Button>
-                        </Link>
                     </div>
 
-                    {/* Table */}
-                    <div className="self-stretch flex flex-col">
-                        {/* Table Header */}
-                        <div className="self-stretch px-4 py-3 bg-gray-50 border-b border-slate-200 grid grid-cols-12 gap-4 items-center">
-                            <div className="col-span-1 text-slate-900 text-sm font-medium">Thumbnail</div>
-                            <div className="col-span-4 text-slate-900 text-sm font-medium">Title</div>
-                            <div className="col-span-2 text-slate-900 text-sm font-medium">Category</div>
-                            <div className="col-span-3 text-slate-900 text-sm font-medium">Created At</div>
-                            <div className="col-span-2 text-slate-900 text-sm font-medium">Actions</div>
-                        </div>
-
-                        {/* Table Rows */}
-                        <div className="flex flex-col">
-                            {filteredArticles.map((article) => (
-                                <div key={article.id} className="self-stretch px-4 py-4 border-b border-slate-200 grid grid-cols-12 gap-4 items-center hover:bg-gray-50">
-                                    <div className="col-span-1">
+                    {/* Desktop Table View */}
+                    <div className="hidden lg:block w-full">
+                        {/* Table using flexbox layout matching the design */}
+                        <div className="flex">
+                            {/* Thumbnails Column */}
+                            <div className="flex-1 flex flex-col">
+                                <div className="px-4 py-3 bg-gray-100 border-b border-slate-200 flex justify-center items-center">
+                                    <div className="text-slate-900 text-sm font-medium">Thumbnails</div>
+                                </div>
+                                {filteredArticles.map((article) => (
+                                    <div key={`thumb-${article.id}`} className="px-4 py-3 bg-gray-50 border-b border-slate-200 flex justify-center items-center h-[84px]">
                                         <Image
                                             src={article.thumbnail || 'https://placehold.co/60x60'}
                                             alt={article.title}
                                             width={60}
                                             height={60}
-                                            className="rounded-lg object-cover"
+                                            className="w-[60px] h-[60px] object-cover rounded-md"
                                         />
                                     </div>
-                                    <div className="col-span-4">
-                                        <h3 className="text-slate-900 text-sm font-medium line-clamp-2">{article.title}</h3>
+                                ))}
+                            </div>
+
+                            {/* Title Column */}
+                            <div className="flex-1 flex flex-col">
+                                <div className="px-4 py-3 bg-gray-100 border-b border-slate-200 flex justify-center items-center">
+                                    <div className="text-slate-900 text-sm font-medium">Title</div>
+                                </div>
+                                {filteredArticles.map((article) => (
+                                    <div key={`title-${article.id}`} className="px-4 py-3 bg-gray-50 border-b border-slate-200 flex justify-center items-center h-[84px]">
+                                        <div className="flex-1 text-slate-600 text-sm">{article.title}</div>
                                     </div>
-                                    <div className="col-span-2">
-                                        <span className="text-slate-600 text-sm">{article.category}</span>
+                                ))}
+                            </div>
+
+                            {/* Category Column */}
+                            <div className="flex-1 flex flex-col">
+                                <div className="px-4 py-3 bg-gray-100 border-b border-slate-200 flex justify-center items-center">
+                                    <div className="text-slate-900 text-sm font-medium">Category</div>
+                                </div>
+                                {filteredArticles.map((article) => (
+                                    <div key={`cat-${article.id}`} className="px-4 py-3 bg-gray-50 border-b border-slate-200 flex justify-center items-center h-[84px]">
+                                        <div className="text-slate-600 text-sm">{article.category}</div>
                                     </div>
-                                    <div className="col-span-3">
-                                        <span className="text-slate-600 text-sm">{article.createdAt}</span>
+                                ))}
+                            </div>
+
+                            {/* Created At Column */}
+                            <div className="flex-1 flex flex-col">
+                                <div className="px-4 py-3 bg-gray-100 border-b border-slate-200 flex justify-center items-center">
+                                    <div className="text-slate-900 text-sm font-medium">Created at</div>
+                                </div>
+                                {filteredArticles.map((article) => (
+                                    <div key={`date-${article.id}`} className="px-4 py-3 bg-gray-50 border-b border-slate-200 flex justify-center items-center h-[84px]">
+                                        <div className="text-slate-600 text-sm">{article.createdAt}</div>
                                     </div>
-                                    <div className="col-span-2 flex items-center gap-2">
-                                        <Link
-                                            href={`/admin/articles/${article.id}`}
-                                            className="flex items-center gap-1 text-green-600 text-sm font-normal hover:underline"
-                                        >
-                                            <Eye className="w-3 h-3" />
+                                ))}
+                            </div>
+
+                            {/* Action Column */}
+                            <div className="flex-1 flex flex-col">
+                                <div className="px-4 py-3 bg-gray-100 border-b border-slate-200 flex justify-center items-center">
+                                    <div className="text-slate-900 text-sm font-medium">Action</div>
+                                </div>
+                                {filteredArticles.map((article) => (
+                                    <div key={`action-${article.id}`} className="px-4 py-3 bg-gray-50 border-b border-slate-200 flex justify-center items-center gap-3 h-[84px]">
+                                        <Link href={`/admin/articles/preview/${article.id}`} className="text-blue-600 text-sm underline hover:text-blue-700">
                                             Preview
                                         </Link>
-                                        <Link
-                                            href={`/admin/articles/${article.id}/edit`}
-                                            className="flex items-center gap-1 text-blue-600 text-sm font-normal hover:underline"
-                                        >
-                                            <Edit className="w-3 h-3" />
+                                        <Link href={`/admin/articles/edit/${article.id}`} className="text-blue-600 text-sm underline hover:text-blue-700">
                                             Edit
                                         </Link>
                                         <button
                                             onClick={() => openDeleteModal(article)}
-                                            className="flex items-center gap-1 text-red-500 text-sm font-normal hover:underline"
+                                            className="text-red-500 text-sm underline hover:text-red-600"
                                         >
-                                            <Trash2 className="w-3 h-3" />
                                             Delete
                                         </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Mobile Card View */}
+                    <div className="lg:hidden w-full">
+                        <div className="flex flex-col">
+                            {filteredArticles.map((article) => (
+                                <div key={article.id} className="p-4 border-b border-slate-200 last:border-b-0">
+                                    <div className="flex gap-3">
+                                        <Image
+                                            src={article.thumbnail || 'https://placehold.co/60x60'}
+                                            alt={article.title}
+                                            width={80}
+                                            height={80}
+                                            className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+                                        />
+                                        <div className="flex-1 min-w-0">
+                                            <h3 className="text-slate-900 text-sm font-medium leading-normal mb-2 line-clamp-2">
+                                                {article.title}
+                                            </h3>
+                                            <div className="text-xs text-slate-600 mb-2">
+                                                <span className="inline-block bg-slate-100 px-2 py-1 rounded mr-2">
+                                                    {article.category}
+                                                </span>
+                                            </div>
+                                            <div className="text-xs text-slate-500 mb-3">
+                                                {article.createdAt}
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <Link href={`/admin/articles/preview/${article.id}`} className="flex-1">
+                                                    <Button variant="outline" size="sm" className="w-full">
+                                                        <Eye className="w-4 h-4 mr-1" />
+                                                        Preview
+                                                    </Button>
+                                                </Link>
+                                                <Link href={`/admin/articles/edit/${article.id}`} className="flex-1">
+                                                    <Button variant="outline" size="sm" className="w-full">
+                                                        <Edit className="w-4 h-4 mr-1" />
+                                                        Edit
+                                                    </Button>
+                                                </Link>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                    onClick={() => openDeleteModal(article)}
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
@@ -232,7 +304,7 @@ export default function ArticleAdminPage() {
 
             {/* Delete Modal */}
             <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-                <DialogContent className="sm:max-w-[425px]">
+                <DialogContent className="sm:max-w-[425px] mx-4">
                     <DialogHeader>
                         <DialogTitle>Delete Article</DialogTitle>
                         <DialogDescription>

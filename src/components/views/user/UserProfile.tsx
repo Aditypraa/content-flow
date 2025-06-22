@@ -1,7 +1,11 @@
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
 import UserNavbar from "@/components/shared/UserNavbar";
 import Footer from "@/components/shared/Footer";
 
@@ -23,12 +27,19 @@ export default function UserProfile() {
                     </div>
 
                     {/* Profile Information */}
-                    <Card className="p-8">
-                        <div className="space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Profile Information</CardTitle>
+                            <CardDescription>Update your personal details and profile settings</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
                             <div className="flex items-center space-x-6">
-                                <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center">
-                                    <span className="text-2xl font-semibold text-gray-600">JD</span>
-                                </div>
+                                <Avatar className="w-24 h-24">
+                                    <AvatarImage src="" alt="Profile picture" />
+                                    <AvatarFallback className="text-2xl font-semibold bg-gray-200 text-gray-600">
+                                        JD
+                                    </AvatarFallback>
+                                </Avatar>
                                 <div>
                                     <h2 className="text-2xl font-semibold text-gray-900">John Doe</h2>
                                     <p className="text-gray-600">john.doe@example.com</p>
@@ -36,101 +47,163 @@ export default function UserProfile() {
                                 </div>
                             </div>
 
-                            <div className="border-t pt-6">
+                            <Separator />
+
+                            <form className="space-y-6">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <Label htmlFor="firstName">First Name</Label>
-                                        <Input id="firstName" defaultValue="John" />
+                                        <Input
+                                            id="firstName"
+                                            name="firstName"
+                                            defaultValue="John"
+                                            aria-describedby="firstName-description"
+                                        />
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="lastName">Last Name</Label>
-                                        <Input id="lastName" defaultValue="Doe" />
+                                        <Input
+                                            id="lastName"
+                                            name="lastName"
+                                            defaultValue="Doe"
+                                            aria-describedby="lastName-description"
+                                        />
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="email">Email</Label>
-                                        <Input id="email" type="email" defaultValue="john.doe@example.com" />
+                                        <Input
+                                            id="email"
+                                            name="email"
+                                            type="email"
+                                            defaultValue="john.doe@example.com"
+                                            aria-describedby="email-description"
+                                        />
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="phone">Phone</Label>
-                                        <Input id="phone" defaultValue="+1 234 567 890" />
+                                        <Input
+                                            id="phone"
+                                            name="phone"
+                                            type="tel"
+                                            defaultValue="+1 234 567 890"
+                                            aria-describedby="phone-description"
+                                        />
                                     </div>
                                     <div className="space-y-2 md:col-span-2">
                                         <Label htmlFor="bio">Bio</Label>
-                                        <textarea
+                                        <Textarea
                                             id="bio"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            name="bio"
                                             rows={4}
                                             defaultValue="A passionate writer and technology enthusiast with a love for sharing knowledge through articles and tutorials."
+                                            aria-describedby="bio-description"
                                         />
                                     </div>
                                 </div>
 
-                                <div className="flex gap-3 mt-6">
-                                    <Button>Save Changes</Button>
-                                    <Button variant="outline">Cancel</Button>
+                                <div className="flex gap-3">
+                                    <Button type="submit">Save Changes</Button>
+                                    <Button type="button" variant="outline">Cancel</Button>
                                 </div>
-                            </div>
-                        </div>
+                            </form>
+                        </CardContent>
                     </Card>
 
                     {/* Account Settings */}
-                    <Card className="p-8">
-                        <h3 className="text-xl font-semibold mb-6">Account Settings</h3>
-                        <div className="space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Account Settings</CardTitle>
+                            <CardDescription>Manage your account preferences and privacy settings</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
                             <div className="flex items-center justify-between">
-                                <div>
-                                    <h4 className="font-medium">Email Notifications</h4>
-                                    <p className="text-sm text-gray-600">Receive notifications about new articles and updates</p>
+                                <div className="space-y-0.5">
+                                    <Label htmlFor="email-notifications" className="text-base font-medium">
+                                        Email Notifications
+                                    </Label>
+                                    <p className="text-sm text-gray-600">
+                                        Receive notifications about new articles and updates
+                                    </p>
                                 </div>
-                                <input type="checkbox" className="w-5 h-5" defaultChecked />
+                                <Switch
+                                    id="email-notifications"
+                                    defaultChecked
+                                    aria-describedby="email-notifications-description"
+                                />
                             </div>
 
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <h4 className="font-medium">Newsletter Subscription</h4>
-                                    <p className="text-sm text-gray-600">Get weekly newsletter with latest articles</p>
-                                </div>
-                                <input type="checkbox" className="w-5 h-5" defaultChecked />
-                            </div>
+                            <Separator />
 
                             <div className="flex items-center justify-between">
-                                <div>
-                                    <h4 className="font-medium">Public Profile</h4>
-                                    <p className="text-sm text-gray-600">Make your profile visible to other users</p>
+                                <div className="space-y-0.5">
+                                    <Label htmlFor="newsletter-subscription" className="text-base font-medium">
+                                        Newsletter Subscription
+                                    </Label>
+                                    <p className="text-sm text-gray-600">
+                                        Get weekly newsletter with latest articles
+                                    </p>
                                 </div>
-                                <input type="checkbox" className="w-5 h-5" />
+                                <Switch
+                                    id="newsletter-subscription"
+                                    defaultChecked
+                                    aria-describedby="newsletter-description"
+                                />
                             </div>
-                        </div>
+
+                            <Separator />
+
+                            <div className="flex items-center justify-between">
+                                <div className="space-y-0.5">
+                                    <Label htmlFor="public-profile" className="text-base font-medium">
+                                        Public Profile
+                                    </Label>
+                                    <p className="text-sm text-gray-600">
+                                        Make your profile visible to other users
+                                    </p>
+                                </div>
+                                <Switch
+                                    id="public-profile"
+                                    aria-describedby="public-profile-description"
+                                />
+                            </div>
+                        </CardContent>
                     </Card>
 
                     {/* Security */}
-                    <Card className="p-8">
-                        <h3 className="text-xl font-semibold mb-6">Security</h3>
-                        <div className="space-y-4">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Security Settings</CardTitle>
+                            <CardDescription>Manage your account security and authentication settings</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
                             <div className="flex items-center justify-between">
-                                <div>
-                                    <h4 className="font-medium">Change Password</h4>
+                                <div className="space-y-0.5">
+                                    <h4 className="text-base font-medium">Change Password</h4>
                                     <p className="text-sm text-gray-600">Update your account password</p>
                                 </div>
                                 <Button variant="outline">Change Password</Button>
                             </div>
 
+                            <Separator />
+
                             <div className="flex items-center justify-between">
-                                <div>
-                                    <h4 className="font-medium">Two-Factor Authentication</h4>
+                                <div className="space-y-0.5">
+                                    <h4 className="text-base font-medium">Two-Factor Authentication</h4>
                                     <p className="text-sm text-gray-600">Add an extra layer of security</p>
                                 </div>
                                 <Button variant="outline">Enable 2FA</Button>
                             </div>
 
+                            <Separator />
+
                             <div className="flex items-center justify-between">
-                                <div>
-                                    <h4 className="font-medium">Delete Account</h4>
+                                <div className="space-y-0.5">
+                                    <h4 className="text-base font-medium">Delete Account</h4>
                                     <p className="text-sm text-gray-600">Permanently delete your account and data</p>
                                 </div>
                                 <Button variant="destructive">Delete Account</Button>
                             </div>
-                        </div>
+                        </CardContent>
                     </Card>
                 </div>
             </div>

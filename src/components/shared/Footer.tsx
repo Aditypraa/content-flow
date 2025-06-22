@@ -1,4 +1,6 @@
 import React from 'react';
+import Image from 'next/image';
+import { Separator } from '@/components/ui/separator';
 
 interface FooterProps {
     brandName?: string;
@@ -12,23 +14,31 @@ export default function Footer({
     className = ""
 }: FooterProps) {
     return (
-        <div className={`self-stretch h-[100px] relative bg-blue-600/90 overflow-hidden ${className}`}>
-            <div className="left-[506px] top-[37px] absolute inline-flex justify-start items-center gap-4">
-                <div className="w-[133.40px] h-6 relative overflow-hidden">
-                    <div className="w-[20.09px] h-[22.33px] left-0 top-0 absolute bg-white" />
-                    <div className="w-[18.97px] h-[11.65px] left-[114.43px] top-[6.83px] absolute bg-white" />
-                    <div className="w-[10.95px] h-[11.63px] left-[101.34px] top-[7px] absolute bg-white" />
-                    <div className="w-[9.54px] h-[11.86px] left-[90.25px] top-[6.81px] absolute bg-white" />
-                    <div className="w-[11.94px] h-[17.14px] left-[77.55px] top-[6.81px] absolute bg-white" />
-                    <div className="w-[3.57px] h-[16.25px] left-[72.19px] top-[2.23px] absolute bg-white" />
-                    <div className="w-[11.82px] h-[11.86px] left-[59.29px] top-[6.81px] absolute bg-white" />
-                    <div className="w-[11.82px] h-[11.86px] left-[46.79px] top-[6.81px] absolute bg-white" />
-                    <div className="w-[11.82px] h-[11.86px] left-[34.30px] top-[6.81px] absolute bg-white" />
-                    <div className="w-[7.67px] h-[14.47px] left-[26.23px] top-[4.02px] absolute bg-white" />
-                    <div className="w-[11.06px] h-[5.83px] left-[47.56px] top-[17.96px] absolute bg-white" />
+        <footer
+            className={`bg-blue-600/90 py-8 ${className}`}
+            role="contentinfo"
+            aria-label="Site footer"
+        >
+            <div className="max-w-7xl mx-auto px-4">
+                <div className="flex flex-col items-center space-y-4">
+                    <Image
+                        src="/Logo.svg"
+                        alt="Logo"
+                        width={134}
+                        height={24}
+                        priority
+                        className="h-6 w-auto"
+                    />
+
+                    <Separator className="w-full max-w-md bg-white/20" />
+
+                    <div className="text-center">
+                        <p className="text-white text-sm font-normal leading-normal">
+                            © {year} {brandName}. All rights reserved.
+                        </p>
+                    </div>
                 </div>
-                <div className="justify-start text-white text-base font-normal font-['Archivo'] leading-normal">© {year} {brandName}. All rights reserved.</div>
             </div>
-        </div>
+        </footer>
     );
 }

@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import UserNavbar from "@/components/shared/UserNavbar";
 import Footer from "@/components/shared/Footer";
 
@@ -20,27 +21,27 @@ export default function ArticlesUserPage() {
                             </h1>
                             <p className="text-white text-2xl">Your daily dose of design insights!</p>
                         </div>
-                        <div className="flex gap-2 justify-center">
-                            <select className="px-3 py-2 border border-gray-300 rounded-md bg-white">
-                                <option value="">Select category</option>
-                                <option value="design">Design</option>
-                                <option value="development">Development</option>
-                                <option value="technology">Technology</option>
-                            </select>
+                        <div className="flex gap-2 justify-center items-center">
+                            <Select>
+                                <SelectTrigger className="w-[200px] bg-white">
+                                    <SelectValue placeholder="Select category" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="design">Design</SelectItem>
+                                    <SelectItem value="development">Development</SelectItem>
+                                    <SelectItem value="technology">Technology</SelectItem>
+                                    <SelectItem value="career">Career</SelectItem>
+                                    <SelectItem value="tutorial">Tutorial</SelectItem>
+                                    <SelectItem value="news">News</SelectItem>
+                                </SelectContent>
+                            </Select>
                             <Input
-                                placeholder="Search articles"
-                                className="w-96"
+                                placeholder="Search articles..."
+                                className="w-96 bg-white"
+                                type="search"
+                                aria-label="Search articles"
                             />
                         </div>
-                    </div>
-                </div>
-
-                {/* Navigation */}
-                <div className="absolute top-0 left-0 right-0 px-16 py-8 flex justify-between items-center">
-                    <div className="text-white text-xl font-bold">Logo</div>
-                    <div className="flex items-center gap-4">
-                        <Button variant="ghost" className="text-white">Login</Button>
-                        <Button variant="outline" className="text-white border-white">Register</Button>
                     </div>
                 </div>
             </div>

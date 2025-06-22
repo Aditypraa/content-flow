@@ -1,113 +1,138 @@
 "use client";
 
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
-import Logo from "@/components/shared/Logo";
-import { FileText, User, Users, LogOut } from "lucide-react";
-import Link from "next/link";
+import React, { useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { Button } from '@/components/ui/button';
+import { X, FileText, Tag, LogOut } from 'lucide-react';
+import LogoutConfirmationModal from './LogoutConfirmationModal';
 
 interface SidebarProps {
-    activeMenu?: "articles" | "categories" | "profile";
+    activeMenu?: "articles" | "categories" | "logout";
+    isOpen?: boolean;
+    onClose?: () => void;
+    isMobile?: boolean;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activeMenu }) => {
-    const [isLogoutOpen, setIsLogoutOpen] = useState(false);
+export default function Sidebar({
+    activeMenu,
+    isOpen = true,
+    onClose,
+    isMobile = false
+}: SidebarProps) {
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
 
-    const handleLogout = () => {
-        // Here you would typically call an API to logout or clear session
-        console.log('Logging out...');
-        // For now, we'll just redirect to login page
-        window.location.href = '/auth/login';
+    const handleLogoutClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        setShowLogoutModal(true);
     };
+    const menuItems = [
+        {
+            key: "articles",
+            label: "Articles",
+            href: "/admin/articles",
+            icon: FileText
+        },
+        {
+            key: "categories",
+            label: "Category",
+            href: "/admin/categories",
+            icon: Tag
+        },
+        {
+            key: "logout",
+            label: "Logout",
+            href: "/auth/login",
+            icon: LogOut
+        }
+    ];
+
+    const sidebarClasses = isMobile
+        ? `fixed inset-y-0 left-0 z-50 w-64 h-full bg-blue-600 shadow-lg transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'
+        }`
+        : "w-64 h-screen bg-blue-600 shadow-sm flex-shrink-0";
+
     return (
-        <div className="w-[267px] h-full pt-6 pb-4 bg-blue-600 flex flex-col justify-start items-center gap-4 overflow-hidden">
-            <div className="w-full flex flex-col gap-6">
-                <div className="w-full h-9 px-8 flex items-center gap-2">
-                    <Logo variant="white" />
+        <>
+            {/* Mobile Overlay */}
+            {isMobile && isOpen && (
+                <div
+                    className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+                    onClick={onClose}
+                />
+            )}
+
+            {/* Sidebar */}
+            <div className={sidebarClasses}>
+                <div className="flex flex-col h-full">
+                    {/* Header */}
+                    <div className="flex items-center justify-between p-6 border-b border-blue-500">
+                        <Image
+                            src="/Logo.svg"
+                            alt="Logo"
+                            width={134}
+                            height={24}
+                            priority
+                            className="h-6 w-auto filter brightness-0 invert"
+                        />
+                        {isMobile && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={onClose}
+                                className="p-2 text-white hover:bg-blue-500 hover:text-white"
+                            >
+                                <X className="w-5 h-5" />
+                            </Button>
+                        )}
+                    </div>
+
+                    {/* Navigation */}
+                    <nav className="flex-1 px-4 py-6">
+                        <ul className="space-y-2">
+                            {menuItems.map((item) => {
+                                const Icon = item.icon;
+                                const isActive = activeMenu === item.key;
+
+                                return (
+                                    <li key={item.key}>
+                                        {item.key === 'logout' ? (
+                                            <button
+                                                onClick={handleLogoutClick}
+                                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left ${isActive
+                                                    ? 'bg-white text-blue-600'
+                                                    : 'text-white hover:bg-blue-500 hover:text-white'
+                                                    }`}
+                                            >
+                                                <Icon className="w-5 h-5" />
+                                                <span className="font-medium">{item.label}</span>
+                                            </button>
+                                        ) : (
+                                            <Link
+                                                href={item.href}
+                                                onClick={isMobile ? onClose : undefined}
+                                                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive
+                                                    ? 'bg-white text-blue-600'
+                                                    : 'text-white hover:bg-blue-500 hover:text-white'
+                                                    }`}
+                                            >
+                                                <Icon className="w-5 h-5" />
+                                                <span className="font-medium">{item.label}</span>
+                                            </Link>
+                                        )}
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    </nav>
                 </div>
-
-                <div className="w-full px-4 flex flex-col gap-2">
-                    <Link href="/admin/articles">
-                        <Button
-                            variant="ghost"
-                            className={`w-full h-10 justify-start gap-3 ${activeMenu === "articles"
-                                ? "bg-white/20 text-white"
-                                : "text-white hover:bg-white/10"
-                                }`}
-                        >
-                            <FileText className="w-5 h-5" />
-                            <span className="text-base font-medium">Articles</span>
-                        </Button>
-                    </Link>
-
-                    <Link href="/admin/categories">
-                        <Button
-                            variant="ghost"
-                            className={`w-full h-10 justify-start gap-3 ${activeMenu === "categories"
-                                ? "bg-white/20 text-white"
-                                : "text-white hover:bg-white/10"
-                                }`}
-                        >
-                            <Users className="w-5 h-5" />
-                            <span className="text-base font-medium">Categories</span>
-                        </Button>
-                    </Link>
-
-                    <Link href="/admin/profile">
-                        <Button
-                            variant="ghost"
-                            className={`w-full h-10 justify-start gap-3 ${activeMenu === "profile"
-                                ? "bg-white/20 text-white"
-                                : "text-white hover:bg-white/10"
-                                }`}
-                        >
-                            <User className="w-5 h-5" />
-                            <span className="text-base font-medium">Profile</span>
-                        </Button>
-                    </Link>
-                </div>
-            </div>
-
-            <div className="mt-auto px-4 w-full">
-                <Button
-                    variant="ghost"
-                    className="w-full h-10 justify-start gap-3 text-white hover:bg-white/10"
-                    onClick={() => setIsLogoutOpen(true)}
-                >
-                    <LogOut className="w-5 h-5" />
-                    <span className="text-base font-medium">Logout</span>
-                </Button>
             </div>
 
             {/* Logout Confirmation Modal */}
-            <Dialog open={isLogoutOpen} onOpenChange={setIsLogoutOpen}>
-                <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                        <DialogTitle>Logout</DialogTitle>
-                        <DialogDescription>
-                            Are you sure you want to logout? You will be redirected to the login page.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsLogoutOpen(false)}>
-                            Cancel
-                        </Button>
-                        <Button variant="destructive" onClick={handleLogout}>
-                            Logout
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-        </div>
+            <LogoutConfirmationModal
+                isOpen={showLogoutModal}
+                onClose={() => setShowLogoutModal(false)}
+            />
+        </>
     );
-};
-
-export default Sidebar;
+}

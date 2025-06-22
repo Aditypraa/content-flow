@@ -17,7 +17,7 @@ export default function ThumbnailUpload({
     label = "Thumbnails",
     acceptedTypes = "image/jpeg,image/png",
     supportText = "Support File Type : jpg or png",
-    className = "w-[223px]"
+    className = "w-full sm:w-[280px] lg:w-[223px]"
 }: ThumbnailUploadProps) {
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -27,14 +27,15 @@ export default function ThumbnailUpload({
     return (
         <div className={`${className} space-y-1`}>
             <Label className="text-gray-900 text-sm font-medium">{label}</Label>
-            <div className="h-[163px] p-3 bg-white rounded-lg border border-slate-300 flex flex-col justify-center items-center gap-2">
-                <div className="flex flex-col items-center gap-3">
+            <div className="h-[140px] sm:h-[163px] p-3 bg-white rounded-lg border border-slate-300 flex flex-col justify-center items-center gap-2">
+                <div className="flex flex-col items-center gap-2 sm:gap-3">
                     <Upload className="w-5 h-5 text-slate-500" />
                     <div className="flex flex-col gap-1 text-center">
                         <label htmlFor="thumbnail-upload" className="text-slate-500 text-xs underline cursor-pointer">
                             Click to select files
                         </label>
-                        <div className="text-slate-500 text-xs">{supportText}</div>
+                        <div className="text-slate-500 text-xs hidden sm:block">{supportText}</div>
+                        <div className="text-slate-500 text-xs sm:hidden">jpg or png</div>
                     </div>
                 </div>
                 <input

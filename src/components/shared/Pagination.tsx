@@ -1,20 +1,23 @@
 "use client";
 
 import React from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
 
 interface PaginationProps {
     currentPage?: number;
     totalPages?: number;
     onPageChange?: (page: number) => void;
     showEllipsis?: boolean;
+    className?: string;
 }
 
 export default function Pagination({
     currentPage = 2,
     totalPages = 10,
     onPageChange,
-    showEllipsis = true
+    showEllipsis = true,
+    className = ""
 }: PaginationProps) {
     const handlePrevious = () => {
         if (currentPage > 1 && onPageChange) {
@@ -35,52 +38,98 @@ export default function Pagination({
     };
 
     return (
-        <div className="self-stretch px-4 py-6 bg-gray-50 border-b border-slate-200 inline-flex justify-between items-center">
-            <div className="flex-1 flex justify-center items-center gap-2">
-                <button
+        <nav
+            className={`self-stretch px-3 lg:px-4 py-4 lg:py-6 bg-gray-50 border-b border-slate-200 flex justify-center items-center ${className}`}
+            role="navigation"
+            aria-label="Pagination Navigation"
+        >
+            <div className="flex items-center gap-1 lg:gap-2">
+                <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={handlePrevious}
                     disabled={currentPage <= 1}
-                    className="h-10 pl-2.5 pr-4 rounded-md flex justify-center items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="gap-1 px-2 lg:px-3"
+                    aria-label={`Go to previous page, page ${currentPage - 1}`}
                 >
                     <ChevronLeft className="w-4 h-4" />
-                    <div className="justify-start text-slate-900 text-sm font-medium font-['Archivo'] leading-tight">Previous</div>
-                </button>
+                    <span className="hidden sm:inline">Previous</span>
+                </Button>
 
-                {/* Page 1 */}
-                {currentPage > 1 && (
-                    <button
-                        onClick={() => handlePageClick(1)}
-                        className="w-10 h-10 rounded-md flex justify-center items-center hover:bg-white hover:outline-1 hover:outline-slate-200"
-                    >
-                        <div className="justify-start text-slate-900 text-sm font-medium font-['Archivo'] leading-tight">1</div>
-                    </button>
+                {/* Show first page if not current and not adjacent */}
+                {currentPage > 3 && (
+                    <>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePageClick(1)}
+                            className="w-8 h-8 lg:w-10 lg:h-10 p-0 text-sm"
+                            aria-label="Go to page 1"
+                        >
+                            1
+                        </Button>
+                        {showEllipsis && currentPage > 4 && (
+                            <div className="flex items-center justify-center w-8 h-8 lg:w-10 lg:h-10" aria-hidden="true">
+                                <MoreHorizontal className="w-3 h-3 lg:w-4 lg:h-4 text-slate-400" />
+                            </div>
+                        )}
+                    </>
                 )}
 
-                {/* Current Page */}
-                <div className="w-10 h-10 bg-white rounded-md outline-1 outline-offset-[-1px] outline-slate-200 flex justify-center items-center">
-                    <div className="justify-start text-slate-900 text-sm font-medium font-['Archivo'] leading-tight">{currentPage}</div>
-                </div>
+                {/* Show pages around current page */}
+                {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
+                    const page = Math.max(1, currentPage - 1) + i;
+                    if (page > totalPages) return null;
 
-                {/* Ellipsis */}
-                {showEllipsis && currentPage < totalPages && (
-                    <div className="w-9 h-9 rounded-md flex justify-center items-center">
-                        <div className="w-6 h-6 relative">
-                            <div className="w-0 h-[0.50px] left-[16px] top-[11.75px] absolute outline-[1.50px] outline-offset-[-0.75px] outline-slate-900" />
-                            <div className="w-0 h-[0.50px] left-[12px] top-[11.75px] absolute outline-[1.50px] outline-offset-[-0.75px] outline-slate-900" />
-                            <div className="w-0 h-[0.50px] left-[8px] top-[11.75px] absolute outline-[1.50px] outline-offset-[-0.75px] outline-slate-900" />
-                        </div>
-                    </div>
+                    const isCurrentPage = page === currentPage;
+
+                    return (
+                        <Button
+                            key={page}
+                            variant={isCurrentPage ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => handlePageClick(page)}
+                            className="w-8 h-8 lg:w-10 lg:h-10 p-0 text-sm"
+                            aria-label={`${isCurrentPage ? 'Current page, ' : ''}Go to page ${page}`}
+                            aria-current={isCurrentPage ? "page" : undefined}
+                        >
+                            {page}
+                        </Button>
+                    );
+                })}
+
+                {/* Show last page if not current and not adjacent */}
+                {currentPage < totalPages - 2 && (
+                    <>
+                        {showEllipsis && currentPage < totalPages - 3 && (
+                            <div className="flex items-center justify-center w-8 h-8 lg:w-10 lg:h-10" aria-hidden="true">
+                                <MoreHorizontal className="w-3 h-3 lg:w-4 lg:h-4 text-slate-400" />
+                            </div>
+                        )}
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePageClick(totalPages)}
+                            className="w-8 h-8 lg:w-10 lg:h-10 p-0 text-sm"
+                            aria-label={`Go to page ${totalPages}`}
+                        >
+                            {totalPages}
+                        </Button>
+                    </>
                 )}
 
-                <button
+                <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={handleNext}
                     disabled={currentPage >= totalPages}
-                    className="h-10 pl-4 pr-2.5 rounded-md flex justify-center items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="gap-1 px-2 lg:px-3"
+                    aria-label={`Go to next page, page ${currentPage + 1}`}
                 >
-                    <div className="justify-start text-slate-900 text-sm font-medium font-['Archivo'] leading-tight">Next</div>
+                    <span className="hidden sm:inline">Next</span>
                     <ChevronRight className="w-4 h-4" />
-                </button>
+                </Button>
             </div>
-        </div>
+        </nav>
     );
 }
