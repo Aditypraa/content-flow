@@ -5,14 +5,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import AdminSidebar from '@/components/shared/AdminSidebar';
+import AdminLayout from '@/components/layouts/AdminLayout';
 
 export default function ArticleEdit() {
     return (
-        <div className="min-h-screen bg-gray-100 flex">
-            <AdminSidebar />
-            <div className="flex-1 p-8">
-                <div className="max-w-4xl mx-auto">
+        <AdminLayout activeMenu="articles" title="Articles">
+            <div className="px-6 pt-6 flex justify-center">
+                <div className="max-w-4xl w-full">
                     <Card>
                         <CardHeader>
                             <CardTitle>Edit Article</CardTitle>
@@ -139,6 +138,6 @@ export default function ArticleEdit() {
                     </Card>
                 </div>
             </div>
-        </div>
+        </AdminLayout>
     );
 }

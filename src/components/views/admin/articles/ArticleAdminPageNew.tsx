@@ -4,15 +4,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
-import { Search, Plus, ChevronDown, Eye, Edit, Trash2 } from 'lucide-react';
+import { Search, Plus, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import AdminLayout from '@/components/layouts/AdminLayout';
@@ -28,22 +20,6 @@ interface Article {
 
 export default function ArticleAdminPage() {
     const [searchTerm, setSearchTerm] = useState('');
-    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-    const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
-
-    const handleDelete = () => {
-        if (selectedArticle) {
-            // Here you would typically call an API to delete the article
-            console.log('Deleting article:', selectedArticle.id);
-            setSelectedArticle(null);
-            setIsDeleteOpen(false);
-        }
-    };
-
-    const openDeleteModal = (article: Article) => {
-        setSelectedArticle(article);
-        setIsDeleteOpen(true);
-    };
 
     // Extended mock data to match the design
     const articles: Article[] = [
@@ -168,18 +144,17 @@ export default function ArticleAdminPage() {
                     <div className="self-stretch flex flex-col">
                         {/* Table Header */}
                         <div className="self-stretch px-4 py-3 bg-gray-50 border-b border-slate-200 grid grid-cols-12 gap-4 items-center">
-                            <div className="col-span-1 text-slate-900 text-sm font-medium">Thumbnail</div>
-                            <div className="col-span-4 text-slate-900 text-sm font-medium">Title</div>
+                            <div className="col-span-6 text-slate-900 text-sm font-medium">Article Title</div>
                             <div className="col-span-2 text-slate-900 text-sm font-medium">Category</div>
                             <div className="col-span-3 text-slate-900 text-sm font-medium">Created At</div>
-                            <div className="col-span-2 text-slate-900 text-sm font-medium">Actions</div>
+                            <div className="col-span-1 text-slate-900 text-sm font-medium">Actions</div>
                         </div>
 
                         {/* Table Rows */}
                         <div className="flex flex-col">
                             {filteredArticles.map((article) => (
                                 <div key={article.id} className="self-stretch px-4 py-4 border-b border-slate-200 grid grid-cols-12 gap-4 items-center hover:bg-gray-50">
-                                    <div className="col-span-1">
+                                    <div className="col-span-6 flex items-center gap-3">
                                         <Image
                                             src={article.thumbnail || 'https://placehold.co/60x60'}
                                             alt={article.title}
@@ -187,9 +162,9 @@ export default function ArticleAdminPage() {
                                             height={60}
                                             className="rounded-lg object-cover"
                                         />
-                                    </div>
-                                    <div className="col-span-4">
-                                        <h3 className="text-slate-900 text-sm font-medium line-clamp-2">{article.title}</h3>
+                                        <div className="flex-1">
+                                            <h3 className="text-slate-900 text-sm font-medium line-clamp-2">{article.title}</h3>
+                                        </div>
                                     </div>
                                     <div className="col-span-2">
                                         <span className="text-slate-600 text-sm">{article.category}</span>
@@ -197,26 +172,16 @@ export default function ArticleAdminPage() {
                                     <div className="col-span-3">
                                         <span className="text-slate-600 text-sm">{article.createdAt}</span>
                                     </div>
-                                    <div className="col-span-2 flex items-center gap-2">
-                                        <Link
-                                            href={`/admin/articles/${article.id}`}
-                                            className="flex items-center gap-1 text-green-600 text-sm font-normal hover:underline"
-                                        >
-                                            <Eye className="w-3 h-3" />
-                                            Preview
-                                        </Link>
+                                    <div className="col-span-1 flex items-center gap-2">
                                         <Link
                                             href={`/admin/articles/${article.id}/edit`}
-                                            className="flex items-center gap-1 text-blue-600 text-sm font-normal hover:underline"
+                                            className="text-blue-600 text-sm font-normal underline"
                                         >
-                                            <Edit className="w-3 h-3" />
                                             Edit
                                         </Link>
                                         <button
-                                            onClick={() => openDeleteModal(article)}
-                                            className="flex items-center gap-1 text-red-500 text-sm font-normal hover:underline"
+                                            className="text-red-500 text-sm font-normal underline"
                                         >
-                                            <Trash2 className="w-3 h-3" />
                                             Delete
                                         </button>
                                     </div>
@@ -229,26 +194,6 @@ export default function ArticleAdminPage() {
                     <Pagination currentPage={2} totalPages={10} />
                 </div>
             </div>
-
-            {/* Delete Modal */}
-            <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-                <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                        <DialogTitle>Delete Article</DialogTitle>
-                        <DialogDescription>
-                            Are you sure you want to delete &quot;{selectedArticle?.title}&quot;? This action cannot be undone.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsDeleteOpen(false)}>
-                            Cancel
-                        </Button>
-                        <Button variant="destructive" onClick={handleDelete}>
-                            Delete Article
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
         </AdminLayout>
     );
 }
