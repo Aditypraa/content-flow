@@ -15,8 +15,8 @@ import {
 } from "@/components/ui/dialog";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import AdminLayout from "@/components/layouts/AdminLayout";
-import Pagination from "@/components/shared/Pagination";
-import SearchInput from "@/components/shared/SearchInput";
+import SearchInput from "@/components/common/forms/SearchInput";
+import Pagination from "@/components/common/feedback/Pagination";
 
 interface Category {
     id: number;

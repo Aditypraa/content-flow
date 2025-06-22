@@ -6,8 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import UserNavbar from "@/components/shared/UserNavbar";
-import Footer from "@/components/shared/Footer";
+import Footer from "@/components/common/navigation/Footer";
+import UserNavbar from "@/components/common/navigation/UserNavbar";
 
 export default function UserProfile() {
     return (

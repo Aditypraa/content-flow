@@ -14,7 +14,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { User, LogOut } from 'lucide-react';
-import LogoutConfirmationModal from './LogoutConfirmationModal';
+import LogoutConfirmationModal from '../modals/LogoutConfirmationModal';
 
 interface UserNavbarProps {
     className?: string;

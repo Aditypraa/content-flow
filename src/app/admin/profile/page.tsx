@@ -1,3 +1,3 @@
 // Export default from UserProfile view component
 
-export { default } from "@/components/views/admin/UserProfile";
+export { default } from "@/components/features/profile/admin/UserProfile";

@@ -1,8 +1,8 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import UserNavbar from "@/components/shared/UserNavbar";
-import Footer from "@/components/shared/Footer";
+import Footer from "@/components/common/navigation/Footer";
+import UserNavbar from "@/components/common/navigation/UserNavbar";
 
 export default function DetailArticle() {
     return (

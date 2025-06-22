@@ -8,8 +8,8 @@ import { Plus, Edit, Trash2, Eye } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import AdminLayout from '@/components/layouts/AdminLayout';
-import SearchInput from '@/components/shared/SearchInput';
-import Pagination from '@/components/shared/Pagination';
+import SearchInput from '@/components/common/forms/SearchInput';
+import Pagination from '@/components/common/feedback/Pagination';
 
 interface Article {
     id: string;

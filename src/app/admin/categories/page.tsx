@@ -1,3 +1,3 @@
 // Export default from CategoryPage view component
 
-export { default } from "@/components/views/admin/categories/CategoryPage";
+export { default } from "@/components/features/categories/admin/CategoryPage";

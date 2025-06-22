@@ -5,7 +5,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { X, FileText, Tag, LogOut } from 'lucide-react';
-import LogoutConfirmationModal from './LogoutConfirmationModal';
+import { ADMIN_MENU_ITEMS } from '@/lib/constants/app';
+import LogoutConfirmationModal from '../modals/LogoutConfirmationModal';
 
 interface SidebarProps {
     activeMenu?: "articles" | "categories" | "logout";
@@ -26,26 +27,11 @@ export default function Sidebar({
         e.preventDefault();
         setShowLogoutModal(true);
     };
-    const menuItems = [
-        {
-            key: "articles",
-            label: "Articles",
-            href: "/admin/articles",
-            icon: FileText
-        },
-        {
-            key: "categories",
-            label: "Category",
-            href: "/admin/categories",
-            icon: Tag
-        },
-        {
-            key: "logout",
-            label: "Logout",
-            href: "/auth/login",
-            icon: LogOut
-        }
-    ];
+    const menuItems = ADMIN_MENU_ITEMS.map(item => ({
+        ...item,
+        icon: item.key === "articles" ? FileText :
+            item.key === "categories" ? Tag : LogOut
+    }));
 
     const sidebarClasses = isMobile
         ? `fixed inset-y-0 left-0 z-50 w-64 h-full bg-blue-600 shadow-lg transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'

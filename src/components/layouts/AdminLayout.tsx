@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from 'react';
-import Sidebar from '@/components/shared/Sidebar';
-import NavHeader from '@/components/shared/NavHeader';
+import Sidebar from '@/components/common/navigation/Sidebar';
+import NavHeader from '@/components/common/navigation/NavHeader';
 
 interface AdminLayoutProps {
     children: React.ReactNode;
