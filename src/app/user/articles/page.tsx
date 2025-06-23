@@ -2,8 +2,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import UserLayout from "@/components/layouts/UserLayout";
 import UserNavbar from "@/components/common/navigation/UserNavbar";
-import Footer from "@/components/common/navigation/Footer";
 import Image from "next/image";
 
 const articles = [
@@ -52,7 +52,7 @@ const articles = [
 
 export default function ArticlesUserPage() {
     return (
-        <div className="min-h-screen bg-white">
+        <UserLayout backgroundColor="white" showNavbar={false}>
             {/* Header Section */}
             <div className="bg-blue-600/90 h-[500px] relative overflow-hidden">
                 <UserNavbar />
@@ -109,9 +109,7 @@ export default function ArticlesUserPage() {
                         </div>
                     </Card>
                     ))}
-                </div>
-
-                {/* Pagination */}
+                </div>                {/* Pagination */}
                 <div className="flex justify-center mt-12">
                     <div className="flex gap-2">
                         <Button variant="outline" size="sm">Previous</Button>
@@ -122,8 +120,6 @@ export default function ArticlesUserPage() {
                     </div>
                 </div>
             </div>
-
-            <Footer />
-        </div>
+        </UserLayout>
     );
 }

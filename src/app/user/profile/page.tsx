@@ -6,16 +6,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import Footer from "@/components/common/navigation/Footer";
-import UserNavbar from "@/components/common/navigation/UserNavbar";
+import UserLayout from "@/components/layouts/UserLayout";
 
 export default function UserProfile() {
     return (
-        <div className="min-h-screen bg-gray-50">
-            {/* Header */}
-            <div className="bg-white border-b border-gray-200">
-                <UserNavbar isLoggedIn={true} userName="John Doe" />
-            </div>
+        <UserLayout
+            backgroundColor="gray"
+            showNavbarBorder={true}
+            navbarProps={{ isLoggedIn: true, userName: "John Doe" }}
+        >
 
             {/* Main Content */}
             <div className="max-w-4xl mx-auto px-4 py-12">
@@ -165,9 +164,6 @@ export default function UserProfile() {
                     </Card>
                 </div>
             </div>
-
-            {/* Footer */}
-            <Footer />
-        </div>
+        </UserLayout>
     );
 }

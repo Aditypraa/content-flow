@@ -1,16 +1,16 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import Footer from "@/components/common/navigation/Footer";
-import UserNavbar from "@/components/common/navigation/UserNavbar";
+import UserLayout from "@/components/layouts/UserLayout";
 
 export default function DetailArticle() {
     return (
-        <div className="min-h-screen bg-white">
-            {/* Header */}
-            <div className="border-b border-slate-200">
-                <UserNavbar showAuthButtons={true} />
-            </div>
+        <UserLayout
+            backgroundColor="white"
+            showNavbarBorder={true}
+            navbarProps={{ showAuthButtons: true }}
+            footerClassName="mt-16"
+        >
 
             {/* Article Content */}
             <div className="max-w-4xl mx-auto px-4 py-12">
@@ -129,8 +129,6 @@ export default function DetailArticle() {
                     </div>
                 </article>
             </div>
-
-            <Footer className="mt-16" />
-        </div>
+        </UserLayout>
     );
 }
