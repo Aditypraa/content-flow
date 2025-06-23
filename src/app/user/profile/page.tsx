@@ -1,14 +1,75 @@
+"use client";
+
+import { toast } from "sonner";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form";
 import UserLayout from "@/components/layouts/UserLayout";
 
+const profileSchema = z.object({
+    firstName: z.string().min(1, "First name is required"),
+    lastName: z.string().min(1, "Last name is required"),
+    email: z.string().email("Please enter a valid email"),
+    bio: z.string().max(500, "Bio must be less than 500 characters").optional(),
+});
+
+const passwordSchema = z.object({
+    currentPassword: z.string().min(1, "Current password is required"),
+    newPassword: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string().min(1, "Please confirm your password"),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+});
+
+type ProfileFormValues = z.infer<typeof profileSchema>;
+type PasswordFormValues = z.infer<typeof passwordSchema>;
+
 export default function UserProfile() {
+    const profileForm = useForm<ProfileFormValues>({
+        resolver: zodResolver(profileSchema),
+        defaultValues: {
+            firstName: "John",
+            lastName: "Doe",
+            email: "john.doe@example.com",
+            bio: "I'm a passionate reader and writer who loves technology and innovation.",
+        },
+    });
+
+    const passwordForm = useForm<PasswordFormValues>({
+        resolver: zodResolver(passwordSchema),
+        defaultValues: {
+            currentPassword: "",
+            newPassword: "",
+            confirmPassword: "",
+        },
+    });
+
+    const onProfileSubmit = (data: ProfileFormValues) => {
+        console.log("Profile data:", data);
+        toast.success("Profile updated successfully!");
+    };
+
+    const onPasswordSubmit = (data: PasswordFormValues) => {
+        console.log("Password data:", data);
+        toast.success("Password updated successfully!");
+        passwordForm.reset();
+    };
     return (
         <UserLayout
             backgroundColor="gray"
@@ -48,31 +109,70 @@ export default function UserProfile() {
 
                             <Separator />
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <Label htmlFor="firstName">First Name</Label>
-                                    <Input id="firstName" defaultValue="John" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="lastName">Last Name</Label>
-                                    <Input id="lastName" defaultValue="Doe" />
-                                </div>
-                            </div>
+                            <Form {...profileForm}>
+                                <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <FormField
+                                            control={profileForm.control}
+                                            name="firstName"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>First Name</FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={profileForm.control}
+                                            name="lastName"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Last Name</FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="email">Email</Label>
-                                <Input id="email" type="email" defaultValue="john.doe@example.com" />
-                            </div>
+                                    <FormField
+                                        control={profileForm.control}
+                                        name="email"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Email</FormLabel>
+                                                <FormControl>
+                                                    <Input {...field} type="email" />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
 
-                            <div className="space-y-2">
-                                <Label htmlFor="bio">Bio</Label>
-                                <Textarea
-                                    id="bio"
-                                    placeholder="Tell us about yourself..."
-                                    defaultValue="I'm a passionate reader and writer who loves technology and innovation."
-                                    rows={4}
-                                />
-                            </div>
+                                    <FormField
+                                        control={profileForm.control}
+                                        name="bio"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Bio</FormLabel>
+                                                <FormControl>
+                                                    <Textarea {...field} placeholder="Tell us about yourself..." rows={4} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    <Button type="submit" disabled={profileForm.formState.isSubmitting}>
+                                        Save Profile Changes
+                                    </Button>
+                                </form>
+                            </Form>
                         </CardContent>
                     </Card>
 
@@ -83,21 +183,56 @@ export default function UserProfile() {
                             <CardDescription>Manage your password and account security</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="currentPassword">Current Password</Label>
-                                <Input id="currentPassword" type="password" />
-                            </div>
+                            <Form {...passwordForm}>
+                                <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-6">
+                                    <FormField
+                                        control={passwordForm.control}
+                                        name="currentPassword"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Current Password</FormLabel>
+                                                <FormControl>
+                                                    <Input {...field} type="password" />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <Label htmlFor="newPassword">New Password</Label>
-                                    <Input id="newPassword" type="password" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                                    <Input id="confirmPassword" type="password" />
-                                </div>
-                            </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <FormField
+                                            control={passwordForm.control}
+                                            name="newPassword"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>New Password</FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} type="password" />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={passwordForm.control}
+                                            name="confirmPassword"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Confirm New Password</FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} type="password" />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+
+                                    <Button type="submit" disabled={passwordForm.formState.isSubmitting}>
+                                        Update Password
+                                    </Button>
+                                </form>
+                            </Form>
                         </CardContent>
                     </Card>
 

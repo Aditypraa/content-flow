@@ -1,9 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
+import { toast } from "sonner";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
     Dialog,
     DialogContent,
@@ -13,10 +17,27 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import AdminLayout from "@/components/layouts/AdminLayout";
 import SearchInput from "@/components/common/forms/SearchInput";
 import Pagination from "@/components/common/feedback/Pagination";
+import DeleteConfirmationModal from "@/components/common/modals/DeleteConfirmationModal";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
 
 interface Category {
     id: number;
@@ -25,6 +46,12 @@ interface Category {
     articleCount: number;
     createdAt: string;
 }
+
+const categorySchema = z.object({
+    name: z.string().min(1, "Category name is required").min(2, "Category name must be at least 2 characters"),
+});
+
+type CategoryFormValues = z.infer<typeof categorySchema>;
 
 const CategoryPage = () => {
     const [categories, setCategories] = useState<Category[]>([
@@ -38,12 +65,25 @@ const CategoryPage = () => {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-    const [formData, setFormData] = useState({ name: "" });
 
-    const handleAdd = () => {
+    const addForm = useForm<CategoryFormValues>({
+        resolver: zodResolver(categorySchema),
+        defaultValues: {
+            name: "",
+        },
+    });
+
+    const editForm = useForm<CategoryFormValues>({
+        resolver: zodResolver(categorySchema),
+        defaultValues: {
+            name: "",
+        },
+    });
+
+    const onAddSubmit = (data: CategoryFormValues) => {
         const newCategory = {
             id: Date.now(),
-            name: formData.name,
+            name: data.name,
             description: "", // Default empty description
             articleCount: 0,
             createdAt: new Date().toLocaleString('en-US', {
@@ -56,20 +96,22 @@ const CategoryPage = () => {
             })
         };
         setCategories([...categories, newCategory]);
-        setFormData({ name: "" });
+        addForm.reset();
         setIsAddOpen(false);
+        toast.success("Category added successfully!");
     };
 
-    const handleEdit = () => {
+    const onEditSubmit = (data: CategoryFormValues) => {
         if (!selectedCategory) return;
         setCategories(categories.map(cat =>
             cat.id === selectedCategory.id
-                ? { ...cat, name: formData.name }
+                ? { ...cat, name: data.name }
                 : cat
         ));
         setSelectedCategory(null);
-        setFormData({ name: "" });
+        editForm.reset();
         setIsEditOpen(false);
+        toast.success("Category updated successfully!");
     };
 
     const handleDelete = () => {
@@ -77,11 +119,12 @@ const CategoryPage = () => {
         setCategories(categories.filter(cat => cat.id !== selectedCategory.id));
         setSelectedCategory(null);
         setIsDeleteOpen(false);
+        toast.success("Category deleted successfully!");
     };
 
     const openEditModal = (category: Category) => {
         setSelectedCategory(category);
-        setFormData({ name: category.name });
+        editForm.setValue("name", category.name);
         setIsEditOpen(true);
     };
 
@@ -95,16 +138,20 @@ const CategoryPage = () => {
     );
 
     return (
-        <AdminLayout title="Categories">
+        <AdminLayout
+            title="Categories"
+            breadcrumbs={[
+                { label: "Dashboard", href: "/admin" },
+                { label: "Categories" }
+            ]}
+        >
             <div className="p-4 lg:px-6 lg:pt-6">
                 <div className="w-full max-w-none lg:max-w-[1097px] lg:mx-auto bg-white rounded-xl border border-slate-200 flex flex-col justify-start items-start overflow-hidden">
 
-                    {/* Header with Total Categories and controls */}
+                    {/* Header with controls */}
                     <div className="w-full p-6 bg-gray-50 border-b border-slate-200 flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
-                        {/* Total Categories */}
                         <div className="text-slate-800 text-base font-medium">Total Category : {filteredCategories.length}</div>
 
-                        {/* Controls */}
                         <div className="flex flex-col sm:flex-row justify-start items-start sm:items-center gap-2 lg:gap-4">
                             <SearchInput
                                 placeholder="Search Category"
@@ -128,121 +175,112 @@ const CategoryPage = () => {
                                             Create a new category for organizing articles.
                                         </DialogDescription>
                                     </DialogHeader>
-                                    <div className="grid gap-4 py-4">
-                                        <div className="grid gap-2">
-                                            <Label htmlFor="add-name">Category Name</Label>
-                                            <Input
-                                                id="add-name"
-                                                value={formData.name}
-                                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                                placeholder="Enter category name"
+                                    <Form {...addForm}>
+                                        <form onSubmit={addForm.handleSubmit(onAddSubmit)} className="space-y-4">
+                                            <FormField
+                                                control={addForm.control}
+                                                name="name"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Category Name</FormLabel>
+                                                        <FormControl>
+                                                            <Input {...field} placeholder="Enter category name" />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
                                             />
-                                        </div>
-                                    </div>
-                                    <DialogFooter>
-                                        <Button variant="outline" onClick={() => setIsAddOpen(false)}>
-                                            Cancel
-                                        </Button>
-                                        <Button onClick={handleAdd} disabled={!formData.name.trim()}>
-                                            Add Category
-                                        </Button>
-                                    </DialogFooter>
+                                            <DialogFooter>
+                                                <Button type="button" variant="outline" onClick={() => setIsAddOpen(false)}>
+                                                    Cancel
+                                                </Button>
+                                                <Button type="submit" disabled={addForm.formState.isSubmitting}>
+                                                    Add Category
+                                                </Button>
+                                            </DialogFooter>
+                                        </form>
+                                    </Form>
                                 </DialogContent>
                             </Dialog>
                         </div>
                     </div>
 
-                    {/* Desktop Table View */}
-                    <div className="hidden lg:block w-full">
-                        {/* Table using flexbox layout matching the design */}
-                        <div className="flex">
-                            {/* Category Column */}
-                            <div className="flex-1 flex flex-col">
-                                <div className="px-4 py-3 bg-gray-100 border-b border-slate-200 flex justify-center items-center">
-                                    <div className="text-slate-900 text-sm font-medium">Category</div>
-                                </div>
+                    {/* Category List */}
+                    <div className="w-full overflow-x-auto">
+                        <Table>
+                            <TableHeader>
+                                <TableRow className="bg-gray-100 border-b border-slate-200">
+                                    <TableHead className="text-center text-slate-900 text-sm font-medium">
+                                        Category
+                                    </TableHead>
+                                    <TableHead className="hidden md:table-cell text-center text-slate-900 text-sm font-medium w-[120px]">
+                                        Articles
+                                    </TableHead>
+                                    <TableHead className="hidden md:table-cell text-center text-slate-900 text-sm font-medium w-[200px]">
+                                        Created at
+                                    </TableHead>
+                                    <TableHead className="text-center text-slate-900 text-sm font-medium w-[180px]">
+                                        Action
+                                    </TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
                                 {filteredCategories.map((category) => (
-                                    <div key={`cat-${category.id}`} className="px-4 py-3 bg-gray-50 border-b border-slate-200 flex justify-center items-center h-[84px]">
-                                        <div className="text-slate-600 text-sm">{category.name}</div>
-                                    </div>
+                                    <TableRow key={category.id} className="bg-gray-50 border-b border-slate-200 last:border-b-0">
+                                        <TableCell className="p-4">
+                                            <div className="space-y-1">
+                                                <h3 className="text-sm font-medium text-gray-900 md:text-slate-600 md:font-normal md:text-center">
+                                                    {category.name}
+                                                </h3>
+                                                <div className="md:hidden space-y-1">
+                                                    <div className="text-sm text-gray-600">{category.description}</div>
+                                                    <div className="text-xs text-gray-500 flex items-center gap-2">
+                                                        <Badge variant={category.articleCount > 0 ? "default" : "secondary"}>
+                                                            {category.articleCount} articles
+                                                        </Badge>
+                                                        <span>Created: {category.createdAt}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="hidden md:table-cell text-center p-4">
+                                            <Badge variant={category.articleCount > 0 ? "default" : "secondary"}>
+                                                {category.articleCount}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="hidden md:table-cell text-center p-4">
+                                            <div className="text-slate-600 text-sm">{category.createdAt}</div>
+                                        </TableCell>
+                                        <TableCell className="p-4">
+                                            <div className="flex gap-2 md:gap-1 md:justify-center">
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => openEditModal(category)}
+                                                    className="flex-1 md:flex-none h-8 md:h-auto px-3 md:px-1 text-xs
+                                                             md:bg-transparent md:border-0 md:text-blue-600 md:underline md:hover:text-blue-700 md:hover:bg-transparent"
+                                                >
+                                                    <Edit className="w-4 h-4 md:w-3 md:h-3 mr-1 md:mr-0.5" />
+                                                    <span>Edit</span>
+                                                </Button>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="h-8 md:h-auto px-3 md:px-1 text-xs text-red-600 hover:text-red-700 hover:bg-red-50
+                                                             md:bg-transparent md:border-0 md:text-red-500 md:underline md:hover:text-red-600 md:hover:bg-transparent"
+                                                    onClick={() => openDeleteModal(category)}
+                                                >
+                                                    <Trash2 className="w-4 h-4 md:w-3 md:h-3 mr-1 md:mr-0.5" />
+                                                    <span>Delete</span>
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
                                 ))}
-                            </div>
-
-                            {/* Created At Column */}
-                            <div className="flex-1 flex flex-col">
-                                <div className="px-4 py-3 bg-gray-100 border-b border-slate-200 flex justify-center items-center">
-                                    <div className="text-slate-900 text-sm font-medium">Created at</div>
-                                </div>
-                                {filteredCategories.map((category) => (
-                                    <div key={`date-${category.id}`} className="px-4 py-3 bg-gray-50 border-b border-slate-200 flex justify-center items-center h-[84px]">
-                                        <div className="text-slate-600 text-sm">{category.createdAt}</div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* Action Column */}
-                            <div className="flex-1 flex flex-col">
-                                <div className="px-4 py-3 bg-gray-100 border-b border-slate-200 flex justify-center items-center">
-                                    <div className="text-slate-900 text-sm font-medium">Action</div>
-                                </div>
-                                {filteredCategories.map((category) => (
-                                    <div key={`action-${category.id}`} className="px-4 py-3 bg-gray-50 border-b border-slate-200 flex justify-center items-center gap-3 h-[84px]">
-                                        <button
-                                            onClick={() => openEditModal(category)}
-                                            className="text-blue-600 text-sm underline hover:text-blue-700 cursor-pointer"
-                                        >
-                                            Edit
-                                        </button>
-                                        <button
-                                            onClick={() => openDeleteModal(category)}
-                                            className="text-red-500 text-sm underline hover:text-red-600 cursor-pointer"
-                                        >
-                                            Delete
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                            </TableBody>
+                        </Table>
                     </div>
 
-                    {/* Mobile Card View */}
-                    <div className="lg:hidden w-full">
-                        <div className="flex flex-col">
-                            {filteredCategories.map((category) => (
-                                <div key={category.id} className="p-4 border-b border-slate-200 last:border-b-0">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <h3 className="text-sm font-medium text-gray-900">{category.name}</h3>
-                                        <div className="flex gap-2">
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => openEditModal(category)}
-                                            >
-                                                <Edit className="w-4 h-4" />
-                                            </Button>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                onClick={() => openDeleteModal(category)}
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                    <p className="text-sm text-gray-600 mb-2">{category.description}</p>
-                                    <div className="text-xs text-gray-500 mb-2">
-                                        {category.articleCount} articles
-                                    </div>
-                                    <div className="text-xs text-gray-500">
-                                        Created: {category.createdAt}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Pagination */}
                     <Pagination currentPage={1} totalPages={5} />
                 </div>
             </div>
@@ -256,47 +294,42 @@ const CategoryPage = () => {
                             Update the category name below.
                         </DialogDescription>
                     </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        <div className="grid gap-2">
-                            <Label htmlFor="edit-name">Category Name</Label>
-                            <Input
-                                id="edit-name"
-                                value={formData.name}
-                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                placeholder="Enter category name"
+                    <Form {...editForm}>
+                        <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4">
+                            <FormField
+                                control={editForm.control}
+                                name="name"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Category Name</FormLabel>
+                                        <FormControl>
+                                            <Input {...field} placeholder="Enter category name" />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
                             />
-                        </div>
-                    </div>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsEditOpen(false)}>
-                            Cancel
-                        </Button>
-                        <Button onClick={handleEdit} disabled={!formData.name.trim()}>
-                            Save Changes
-                        </Button>
-                    </DialogFooter>
+                            <DialogFooter>
+                                <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)}>
+                                    Cancel
+                                </Button>
+                                <Button type="submit" disabled={editForm.formState.isSubmitting}>
+                                    Save Changes
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </Form>
                 </DialogContent>
             </Dialog>
 
             {/* Delete Modal */}
-            <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-                <DialogContent className="sm:max-w-[425px] mx-4">
-                    <DialogHeader>
-                        <DialogTitle>Delete Category</DialogTitle>
-                        <DialogDescription>
-                            Are you sure you want to delete &quot;{selectedCategory?.name}&quot;? This action cannot be undone.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsDeleteOpen(false)}>
-                            Cancel
-                        </Button>
-                        <Button variant="destructive" onClick={handleDelete}>
-                            Delete Category
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            <DeleteConfirmationModal
+                isOpen={isDeleteOpen}
+                onClose={() => setIsDeleteOpen(false)}
+                onConfirm={handleDelete}
+                itemName={selectedCategory?.name}
+                itemType="Category"
+            />
         </AdminLayout>
     );
 };

@@ -91,7 +91,6 @@ export default function NavHeader({
                 </div>
             </header>
 
-            {/* Logout Confirmation Modal */}
             <LogoutConfirmationModal
                 isOpen={showLogoutModal}
                 onClose={() => setShowLogoutModal(false)}
