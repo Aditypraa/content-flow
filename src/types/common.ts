@@ -21,7 +21,7 @@ export interface BaseEntity {
   updatedAt: string;
 }
 
-export type LoadingState = "idle" | "loading" | "succeeded" | "failed";
+export type LoadingState = 'idle' | 'loading' | 'succeeded' | 'failed';
 
 export interface ErrorState {
   message: string;
@@ -29,8 +29,8 @@ export interface ErrorState {
 }
 
 // Menu types for navigation
-export type AdminMenuKey = "articles" | "categories" | "logout";
-export type UserMenuKey = "articles" | "profile" | "logout";
+export type AdminMenuKey = 'articles' | 'categories' | 'logout';
+export type UserMenuKey = 'articles' | 'profile' | 'logout';
 
 // Form validation types
 export interface ValidationError {

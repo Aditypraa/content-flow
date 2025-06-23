@@ -38,7 +38,7 @@ export interface ArticleFilters {
   search?: string;
   category?: string;
   sortBy?: string;
-  sortOrder?: "asc" | "desc";
+  sortOrder?: 'asc' | 'desc';
   page?: number;
   limit?: number;
 }

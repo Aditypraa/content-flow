@@ -1,20 +1,20 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
 
 // Constants defined locally for middleware
 const ROUTES = {
-  LOGIN: "/auth/login",
-  REGISTER: "/auth/register",
-  USER_ARTICLES: "/user/articles",
-  ADMIN_ARTICLES: "/admin/articles",
+  LOGIN: '/auth/login',
+  REGISTER: '/auth/register',
+  USER_ARTICLES: '/user/articles',
+  ADMIN_ARTICLES: '/admin/articles',
 } as const;
 
 const STORAGE_KEYS = {
-  TOKEN: "content_flow_token",
+  TOKEN: 'content_flow_token',
 } as const;
 
 const USER_ROLES = {
-  ADMIN: "Admin",
-  USER: "User",
+  ADMIN: 'Admin',
+  USER: 'User',
 } as const;
 
 export function middleware(request: NextRequest) {
@@ -22,23 +22,23 @@ export function middleware(request: NextRequest) {
 
   // Get token from cookies or localStorage (Note: In middleware, we can only access cookies)
   const token = request.cookies.get(STORAGE_KEYS.TOKEN)?.value;
-  const userRole = request.cookies.get("user_role")?.value;
+  const userRole = request.cookies.get('user_role')?.value;
 
   // Public routes that don't require authentication
-  const publicRoutes = [ROUTES.LOGIN, ROUTES.REGISTER, "/"];
+  const publicRoutes = [ROUTES.LOGIN, ROUTES.REGISTER, '/'];
 
   // Admin-only routes
   const adminRoutes = [
-    "/admin",
-    "/admin/articles",
-    "/admin/articles/create",
-    "/admin/categories",
-    "/admin/categories/create",
-    "/admin/profile",
+    '/admin',
+    '/admin/articles',
+    '/admin/articles/create',
+    '/admin/categories',
+    '/admin/categories/create',
+    '/admin/profile',
   ];
 
   // User-only routes
-  const userRoutes = ["/user", "/user/articles", "/user/profile"];
+  const userRoutes = ['/user', '/user/articles', '/user/profile'];
 
   // Check if route is public
   if (publicRoutes.includes(pathname)) {
@@ -46,11 +46,11 @@ export function middleware(request: NextRequest) {
     if (token && userRole) {
       if (userRole === USER_ROLES.ADMIN) {
         return NextResponse.redirect(
-          new URL(ROUTES.ADMIN_ARTICLES, request.url)
+          new URL(ROUTES.ADMIN_ARTICLES, request.url),
         );
       } else {
         return NextResponse.redirect(
-          new URL(ROUTES.USER_ARTICLES, request.url)
+          new URL(ROUTES.USER_ARTICLES, request.url),
         );
       }
     }
@@ -88,6 +88,6 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 };
