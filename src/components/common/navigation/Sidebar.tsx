@@ -66,7 +66,7 @@ export default function Sidebar({
                                 variant="ghost"
                                 size="sm"
                                 onClick={onClose}
-                                className="p-2 text-white hover:bg-blue-500 hover:text-white"
+                                className="p-2 text-white hover:bg-blue-500 hover:text-white cursor-pointer"
                             >
                                 <X className="w-5 h-5" />
                             </Button>
@@ -85,7 +85,7 @@ export default function Sidebar({
                                         {item.key === 'logout' ? (
                                             <button
                                                 onClick={handleLogoutClick}
-                                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left ${isActive
+                                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left cursor-pointer ${isActive
                                                     ? 'bg-white text-blue-600'
                                                     : 'text-white hover:bg-blue-500 hover:text-white'
                                                     }`}

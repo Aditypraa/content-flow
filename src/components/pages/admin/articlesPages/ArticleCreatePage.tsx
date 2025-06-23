@@ -8,9 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import AdminLayout from '@/components/layouts/AdminLayout';
-import EditorToolbar from '@/components/shared/EditorToolbar';
-import ThumbnailUpload from '@/components/shared/ThumbnailUpload';
 import { Upload } from 'lucide-react';
+import ThumbnailUpload from '@/components/common/forms/ThumbnailUpload';
+import EditorToolbar from '@/components/common/forms/EditorToolbar';
 
 export default function ArticleCreate() {
     const [content, setContent] = useState('');

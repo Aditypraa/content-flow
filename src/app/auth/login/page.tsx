@@ -2,4 +2,4 @@
 
 // contoh Penggunaan View
 
-export { default } from "@/components/features/auth/LoginPage";
+export { default } from "@/components/pages/auth/LoginPage";

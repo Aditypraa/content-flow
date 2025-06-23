@@ -56,7 +56,7 @@ export default function NavHeader({
                 <div className="flex items-center gap-2 lg:gap-3">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <button className="flex items-center gap-2 lg:gap-3 hover:opacity-80 transition-opacity outline-none">
+                            <button className="flex items-center gap-2 lg:gap-3 hover:opacity-80 transition-opacity outline-none cursor-pointer">
                                 <Avatar className="w-7 h-7 lg:w-8 lg:h-8">
                                     <AvatarImage src={userAvatar} alt={userName} />
                                     <AvatarFallback className="bg-blue-200 text-blue-900 text-xs lg:text-sm font-medium">
