@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// Supported image file types and constants
+// Supported image file types
 const SUPPORTED_IMAGE_TYPES = [
   "image/jpeg",
   "image/jpg",
@@ -8,6 +8,8 @@ const SUPPORTED_IMAGE_TYPES = [
   "image/webp",
 ] as const;
 type SupportedImageType = (typeof SUPPORTED_IMAGE_TYPES)[number];
+
+// Maximum file size (5MB)
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
 
 // File upload validation schema
@@ -65,56 +67,20 @@ export const imageUrlSchema = z.object({
     ),
 });
 
-// Search validation schema with debounce
-export const searchSchema = z.object({
-  query: z.string().max(100, "Search query too long").trim().optional(),
-});
-
-// Pagination validation schema
-export const paginationSchema = z.object({
-  page: z.number().int().min(1, "Page must be at least 1").default(1),
-  limit: z
-    .number()
-    .int()
-    .min(1, "Limit must be at least 1")
-    .max(100, "Limit cannot exceed 100")
-    .default(10),
-});
-
-// General ID validation schema
-export const idSchema = z.object({
-  id: z.string().uuid("Invalid ID format"),
-});
-
-// URL parameters validation schema
-export const urlParamsSchema = z.object({
-  id: z.string().min(1, "ID is required"),
-});
-
-// Delete confirmation validation schema
-export const deleteConfirmationSchema = z.object({
-  confirmed: z.boolean().refine((val) => val === true, {
-    message: "Please confirm the deletion",
-  }),
-});
-
-// API response validation schema
-export const apiResponseSchema = z.object({
-  message: z.string(),
-  success: z.boolean().optional(),
-  data: z.any().optional(),
+// Form data for file upload (multipart/form-data)
+export const uploadFormDataSchema = z.object({
+  // Note: In actual usage, this would be handled by FormData
+  // This schema is more for type inference and client-side validation
+  file: z.instanceof(File).optional(),
+  description: z.string().max(255, "Description too long").optional(),
+  alt: z.string().max(100, "Alt text too long").optional(),
 });
 
 // Export types
 export type FileUploadData = z.infer<typeof fileUploadSchema>;
 export type MultipleFilesUploadData = z.infer<typeof multipleFilesUploadSchema>;
 export type ImageUrlData = z.infer<typeof imageUrlSchema>;
-export type SearchData = z.infer<typeof searchSchema>;
-export type PaginationData = z.infer<typeof paginationSchema>;
-export type IdData = z.infer<typeof idSchema>;
-export type UrlParamsData = z.infer<typeof urlParamsSchema>;
-export type DeleteConfirmationData = z.infer<typeof deleteConfirmationSchema>;
-export type ApiResponseData = z.infer<typeof apiResponseSchema>;
+export type UploadFormData = z.infer<typeof uploadFormDataSchema>;
 
 // Helper function to validate file on client side
 export const validateImageFile = (
