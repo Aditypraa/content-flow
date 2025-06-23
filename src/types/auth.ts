@@ -1,10 +1,9 @@
-// Authentication related types
+// Authentication related types based on API documentation
 export interface User {
   id: string;
   username: string;
-  email: string;
-  role: "admin" | "user";
-  avatar?: string;
+  role: "User" | "Admin";
+  password?: string; // Only included in register response
   createdAt: string;
   updatedAt: string;
 }
@@ -16,19 +15,32 @@ export interface LoginCredentials {
 
 export interface RegisterData {
   username: string;
-  email: string;
   password: string;
-  role: "admin" | "user";
+  role: "User" | "Admin";
 }
 
-export interface AuthResponse {
-  user: User;
+export interface LoginResponse {
   token: string;
-  refreshToken: string;
+  role: "User" | "Admin";
+}
+
+export interface RegisterResponse {
+  id: string;
+  username: string;
+  role: "User" | "Admin";
+  password: string; // Hashed password
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProfileResponse {
+  id: string;
+  username: string;
+  role: "User" | "Admin";
 }
 
 export interface AuthState {
-  user: User | null;
+  user: ProfileResponse | null;
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;

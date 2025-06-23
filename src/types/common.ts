@@ -37,3 +37,20 @@ export interface ValidationError {
   field: string;
   message: string;
 }
+
+// Upload types based on API documentation
+export interface UploadResponse {
+  imageUrl: string;
+}
+
+// Generic API error response
+export interface ApiError {
+  message: string;
+  status?: number;
+  code?: string;
+}
+
+// Delete response based on API documentation
+export interface DeleteResponse {
+  message: string;
+}

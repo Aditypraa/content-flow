@@ -1,41 +1,51 @@
-// Article related types
+// Article related types based on API documentation
 export interface Article {
   id: string;
   title: string;
   content: string;
-  excerpt?: string;
-  thumbnail?: string;
+  userId: string;
   categoryId: string;
-  authorId: string;
-  status: "draft" | "published" | "archived";
   createdAt: string;
   updatedAt: string;
-  publishedAt?: string;
+  // Nested objects from API response
+  category?: {
+    id: string;
+    name: string;
+    userId?: string;
+    createdAt?: string;
+    updatedAt?: string;
+  };
+  user?: {
+    id: string;
+    username: string;
+    role?: string;
+  };
 }
 
 export interface ArticleCreateData {
   title: string;
   content: string;
-  excerpt?: string;
-  thumbnail?: string;
   categoryId: string;
-  status: "draft" | "published";
 }
 
-export interface ArticleUpdateData extends Partial<ArticleCreateData> {
-  id: string;
+export interface ArticleUpdateData {
+  title?: string;
+  content?: string;
+  categoryId?: string;
 }
 
 export interface ArticleFilters {
   search?: string;
   category?: string;
-  status?: "draft" | "published" | "archived";
-  author?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+  page?: number;
+  limit?: number;
 }
 
-export interface ArticlePagination {
+export interface ArticleListResponse {
+  data: Article[];
+  total: number;
   page: number;
   limit: number;
-  total: number;
-  totalPages: number;
 }

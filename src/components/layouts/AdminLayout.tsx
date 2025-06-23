@@ -6,7 +6,6 @@ import NavHeader from '@/components/common/navigation/NavHeader';
 
 interface AdminLayoutProps {
     children: React.ReactNode;
-    activeMenu?: "articles" | "categories" | "logout";
     title: string;
     userName?: string;
     userInitial?: string;
@@ -15,7 +14,6 @@ interface AdminLayoutProps {
 
 export default function AdminLayout({
     children,
-    activeMenu,
     title,
     userName = "James Dean",
     userInitial = "J",
@@ -27,7 +25,7 @@ export default function AdminLayout({
         <div className="h-screen bg-gray-100 overflow-hidden">
             {/* Desktop Layout */}
             <div className="hidden lg:flex h-full">
-                <Sidebar activeMenu={activeMenu} />
+                <Sidebar />
                 <div className="flex-1 flex flex-col h-full">
                     <NavHeader
                         title={title}
@@ -57,7 +55,6 @@ export default function AdminLayout({
                     {children}
                 </main>
                 <Sidebar
-                    activeMenu={activeMenu}
                     isOpen={isSidebarOpen}
                     onClose={() => setIsSidebarOpen(false)}
                     isMobile={true}
