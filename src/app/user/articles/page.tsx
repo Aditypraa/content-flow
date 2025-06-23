@@ -5,6 +5,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import UserLayout from "@/components/layouts/UserLayout";
 import UserNavbar from "@/components/common/navigation/UserNavbar";
 import Image from "next/image";
+import Pagination from "@/components/common/feedback/Pagination";
+import { ArrowRight } from "lucide-react";
 
 const articles = [
     {
@@ -104,21 +106,19 @@ export default function ArticlesUserPage() {
                             <p className="text-gray-600 mb-4">{article.description}</p>
                             <div className="flex items-center justify-between">
                                 <span className="text-sm text-gray-500">{article.date}</span>
-                                <Button variant="ghost" size="sm">Read More</Button>
+                                <Button variant="ghost" size="sm" aria-label="Read more about article">
+                                    Read More <ArrowRight className="w-4 h-4 ml-1" />
+                                </Button>
                             </div>
                         </div>
                     </Card>
                     ))}
-                </div>                {/* Pagination */}
-                <div className="flex justify-center mt-12">
-                    <div className="flex gap-2">
-                        <Button variant="outline" size="sm">Previous</Button>
-                        <Button variant="outline" size="sm">1</Button>
-                        <Button variant="default" size="sm">2</Button>
-                        <Button variant="outline" size="sm">3</Button>
-                        <Button variant="outline" size="sm">Next</Button>
-                    </div>
                 </div>
+            </div>
+
+            {/* Pagination */}
+            <div className="mt-12">
+                <Pagination currentPage={2} totalPages={3} />
             </div>
         </UserLayout>
     );
