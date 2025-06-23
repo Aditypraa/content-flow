@@ -224,16 +224,14 @@ export default function ArticleAdminPage() {
                                     <div className="text-slate-900 text-sm font-medium">Action</div>
                                 </div>
                                 {filteredArticles.map((article) => (
-                                    <div key={`action-${article.id}`} className="px-4 py-3 bg-gray-50 border-b border-slate-200 flex justify-center items-center gap-3 h-[84px]">
-                                        <Link href={`/admin/articles/${article.id}`} className="text-blue-600 text-sm underline hover:text-blue-700">
-                                            Preview
-                                        </Link>
-                                        <Link href={`/admin/articles/${article.id}/edit`} className="text-blue-600 text-sm underline hover:text-blue-700">
+                                    <div key={`action-${article.id}`} className="px-4 py-3 bg-gray-50 border-b border-slate-200 flex justify-center items-center gap-3 h-[84px]">                                        <Link href={`/admin/articles/${article.id}`} className="text-blue-600 text-sm underline hover:text-blue-700 cursor-pointer">
+                                        Preview
+                                    </Link>
+                                        <Link href={`/admin/articles/${article.id}/edit`} className="text-blue-600 text-sm underline hover:text-blue-700 cursor-pointer">
                                             Edit
-                                        </Link>
-                                        <button
+                                        </Link><button
                                             onClick={() => openDeleteModal(article)}
-                                            className="text-red-500 text-sm underline hover:text-red-600"
+                                            className="text-red-500 text-sm underline hover:text-red-600 cursor-pointer"
                                         >
                                             Delete
                                         </button>

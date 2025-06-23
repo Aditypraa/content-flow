@@ -79,7 +79,7 @@ export default function UserNavbar({
                         <div className="flex items-center gap-4">
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <button className="flex items-center gap-2 hover:opacity-80 transition-opacity outline-none focus:ring-2 focus:ring-white/20 rounded">
+                                    <button className="flex items-center gap-2 hover:opacity-80 transition-opacity outline-none focus:ring-2 focus:ring-white/20 rounded cursor-pointer">
                                         <Avatar className="w-8 h-8">
                                             <AvatarImage src={userAvatar} alt={userName} />
                                             <AvatarFallback className="bg-white/20 text-white text-sm">

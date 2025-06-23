@@ -189,13 +189,13 @@ const CategoryPage = () => {
                                     <div key={`action-${category.id}`} className="px-4 py-3 bg-gray-50 border-b border-slate-200 flex justify-center items-center gap-3 h-[84px]">
                                         <button
                                             onClick={() => openEditModal(category)}
-                                            className="text-blue-600 text-sm underline hover:text-blue-700"
+                                            className="text-blue-600 text-sm underline hover:text-blue-700 cursor-pointer"
                                         >
                                             Edit
                                         </button>
                                         <button
                                             onClick={() => openDeleteModal(category)}
-                                            className="text-red-500 text-sm underline hover:text-red-600"
+                                            className="text-red-500 text-sm underline hover:text-red-600 cursor-pointer"
                                         >
                                             Delete
                                         </button>
