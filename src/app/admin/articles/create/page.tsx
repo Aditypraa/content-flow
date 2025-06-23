@@ -6,11 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { Upload } from 'lucide-react';
 import ThumbnailUpload from '@/components/common/forms/ThumbnailUpload';
-import EditorToolbar from '@/components/common/forms/EditorToolbar';
+import CustomTipTapEditor from '@/components/common/forms/CustomTipTapEditor';
 
 export default function ArticleCreate() {
     const [content, setContent] = useState('');
@@ -80,20 +79,13 @@ export default function ArticleCreate() {
                                             <span className="text-blue-600 underline">category</span> menu
                                         </p>
                                     </div>
-                                </div>
-
-                                {/* Content Editor */}
+                                </div>                                {/* Content Editor */}
                                 <Card className="h-[400px] lg:h-[551px] bg-gray-50 border-slate-200 flex flex-col">
-                                    {/* Editor Toolbar */}
-                                    <EditorToolbar />
-
-                                    {/* Editor Content */}
-                                    <div className="flex-1 p-3 lg:p-4">
-                                        <Textarea
-                                            placeholder="Type a content..."
-                                            value={content}
-                                            onChange={(e) => setContent(e.target.value)}
-                                            className="w-full h-full resize-none border-none bg-transparent text-slate-500 text-sm placeholder:text-slate-500"
+                                    <div className="flex-1">
+                                        <CustomTipTapEditor
+                                            content={content}
+                                            onChange={setContent}
+                                            variant="create"
                                         />
                                     </div>
 
