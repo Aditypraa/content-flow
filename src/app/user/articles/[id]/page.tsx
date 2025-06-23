@@ -2,8 +2,51 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import UserLayout from "@/components/layouts/UserLayout";
+import ArticleContent from "@/components/layouts/ArticleContentLayout";
 
 export default function DetailArticle() {
+    // Contoh content yang dihasilkan dari TipTap editor
+    const articleContent = `
+        <p>In the ever-evolving world of digital product design, collaboration between designers and developers has always been a crucial—yet often challenging—part of the process. In April 2025, <strong>Figma introduced Dev Mode</strong>, a powerful new feature aimed at streamlining that collaboration more than ever before.</p>
+
+        <h2>🔧 What Is Dev Mode?</h2>
+
+        <p>Dev Mode is a new interface within Figma that provides developer-focused tools and removes unnecessary UI clutter that designers typically use. Instead, developers can view ready-to-implement specs, such as <em>spacing</em>, <u>color values</u>, <code>font styles</code>, and asset exports—without disrupting the design file or asking the design team for clarifications.</p>
+
+        <h2>🤝 Bridging the Gap Between Design & Development</h2>
+
+        <p>Traditionally, handing off designs involved back-and-forth communication, misunderstandings, and occasional delays. With Dev Mode, handoff becomes <strong>real-time and seamless</strong>:</p>
+
+        <ul class="tiptap-bullet-list">
+            <li><strong>Live Design Specs:</strong> Developers can inspect the design without needing additional tools or extensions.</li>
+            <li><strong>Code Snippets:</strong> Automatically generated CSS, iOS (Swift), and Android (XML) code help speed up implementation.</li>
+            <li><strong>Version History Access:</strong> Stay aligned with design updates without asking for a new export every time.</li>
+            <li><strong>Integrated Comments:</strong> Developers can leave feedback directly in the design file.</li>
+        </ul>
+
+        <h2>🚀 Why It Matters</h2>
+
+        <blockquote class="tiptap-blockquote">
+            <p>For design teams working in agile environments, the speed of handoff can make or break a sprint. Figma's Dev Mode turns a typically messy phase into a collaborative, real-time experience that reduces errors, shortens build times, and improves the designer-developer relationship.</p>
+        </blockquote>
+
+        <h3>Key Benefits Include:</h3>
+
+        <ol class="tiptap-ordered-list">
+            <li>Reduced communication overhead</li>
+            <li>Faster development cycles</li>
+            <li>Higher fidelity implementations</li>
+            <li>Better designer-developer relationships</li>
+        </ol>
+
+        <p style="text-align: center"><em>The future of design-to-development handoff is here, and it's more seamless than ever.</em></p>
+
+        <h2>🧠 Final Thoughts</h2>
+
+        <p>Whether you're a solo designer working with freelance developers or part of a large product team, Figma's Dev Mode introduces a <strong>smoother, smarter way to collaborate</strong>. It's not just a feature—it's a shift in how digital products are built.</p>
+
+        <p>💬 <s>What do you think of Dev Mode?</s> Have you tried it yet? <a href="https://figma.com">Share your experience</a> in the comments!</p>
+    `;
     return (
         <UserLayout
             backgroundColor="white"
@@ -41,27 +84,10 @@ export default function DetailArticle() {
                     </div>
 
                     {/* Article Body */}
-                    <div className="prose prose-lg max-w-none">
-                        <div className="space-y-6">
-                            <p className="text-gray-700 leading-relaxed">
-                                <strong>🧠 Final Thoughts</strong><br />
-                                Figma&apos;s Dev Mode represents a significant step forward in bridging the gap between design and development.
-                                By providing developers with better tools and more detailed information, Figma is helping to streamline
-                                the entire product development process.
-                            </p>
-
-                            <p className="text-gray-700 leading-relaxed">
-                                As teams continue to work more collaboratively and efficiently, tools like Dev Mode will become increasingly
-                                important. The ability to seamlessly transition from design to code not only saves time but also helps ensure
-                                that the final product matches the original design vision.
-                            </p>
-
-                            <p className="text-gray-700 leading-relaxed">
-                                Whether you&apos;re a designer looking to better collaborate with developers or a developer seeking more
-                                accurate design specifications, Figma&apos;s Dev Mode is definitely worth exploring.
-                            </p>
-                        </div>
-                    </div>
+                    <ArticleContent
+                        content={articleContent}
+                        className="space-y-6"
+                    />
 
                     {/* Related Articles */}
                     <div className="border-t pt-8 mt-12">
