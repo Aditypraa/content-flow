@@ -4,7 +4,13 @@ import AdminLayout from '@/components/layouts/AdminLayout';
 
 const UserProfile = () => {
   return (
-    <AdminLayout title="User Profile">
+    <AdminLayout
+      title="User Profile"
+      breadcrumbs={[
+        { label: 'Dashboard', href: '/admin/dashboard' },
+        { label: 'User Profile', href: '/admin/profile' },
+      ]}
+    >
       <div className="p-4 lg:px-6 lg:pt-6">
         <div className="w-full flex-1 bg-gray-50 border-b border-slate-200 flex justify-center items-start">
           <div className="w-[400px] px-4 py-6 bg-white rounded-xl flex flex-col justify-center items-center gap-9">
@@ -77,7 +83,7 @@ const UserProfile = () => {
             </div>
 
             <Button className="self-stretch h-10 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-slate-50 text-sm font-medium">
-              Back to dashboard
+              Save
             </Button>
           </div>
         </div>

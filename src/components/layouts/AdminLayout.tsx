@@ -79,7 +79,13 @@ export default function AdminLayout({
           </div>
         )}
 
-        <main className="flex-1 overflow-auto">{children}</main>
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+          <div className="w-full max-w-none lg:max-w-[1097px] lg:mx-auto">
+            <div className="bg-white rounded-xl border border-slate-200">
+              {children}
+            </div>
+          </div>
+        </main>
       </div>
 
       {/* Mobile Sidebar with Sheet */}

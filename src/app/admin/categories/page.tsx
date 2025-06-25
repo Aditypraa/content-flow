@@ -168,176 +168,167 @@ const CategoryPage = () => {
         { label: 'Categories' },
       ]}
     >
-      <div className="p-4 lg:px-6 lg:pt-6">
-        <div className="w-full max-w-none lg:max-w-[1097px] lg:mx-auto bg-white rounded-xl border border-slate-200 flex flex-col justify-start items-start overflow-hidden">
-          {/* Header with controls */}
-          <div className="w-full p-6 bg-gray-50 border-b border-slate-200 flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
-            <div className="text-slate-800 text-base font-medium">
-              Total Category : {filteredCategories.length}
-            </div>
+      {/* Header with controls */}
+      <div className="w-full p-6 bg-gray-50 border-b border-slate-200 flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
+        <div className="text-slate-800 text-base font-medium">
+          Total Category : {filteredCategories.length}
+        </div>
 
-            <div className="flex flex-col sm:flex-row justify-start items-start sm:items-center gap-2 lg:gap-4">
-              <SearchInput
-                placeholder="Search Category"
-                value={searchTerm}
-                onChange={setSearchTerm}
-                className="w-full sm:w-60"
-                showClearButton={false}
-              />
+        <div className="flex flex-col sm:flex-row justify-start items-start sm:items-center gap-2 lg:gap-4">
+          <SearchInput
+            placeholder="Search Category"
+            value={searchTerm}
+            onChange={setSearchTerm}
+            className="w-full sm:w-60"
+            showClearButton={false}
+          />
 
-              <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-                <DialogTrigger asChild>
-                  <Button className="h-10 px-4 bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1.5">
-                    <Plus className="w-5 h-5" />
-                    Add Category
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px] mx-4">
-                  <DialogHeader>
-                    <DialogTitle>Add New Category</DialogTitle>
-                    <DialogDescription>
-                      Create a new category for organizing articles.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <Form {...addForm}>
-                    <form
-                      onSubmit={addForm.handleSubmit(onAddSubmit)}
-                      className="space-y-4"
+          <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+            <DialogTrigger asChild>
+              <Button className="h-10 px-4 bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1.5">
+                <Plus className="w-5 h-5" />
+                Add Category
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px] mx-4">
+              <DialogHeader>
+                <DialogTitle>Add New Category</DialogTitle>
+                <DialogDescription>
+                  Create a new category for organizing articles.
+                </DialogDescription>
+              </DialogHeader>
+              <Form {...addForm}>
+                <form
+                  onSubmit={addForm.handleSubmit(onAddSubmit)}
+                  className="space-y-4"
+                >
+                  <FormField
+                    control={addForm.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Category Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Enter category name" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <DialogFooter>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsAddOpen(false)}
                     >
-                      <FormField
-                        control={addForm.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Category Name</FormLabel>
-                            <FormControl>
-                              <Input
-                                {...field}
-                                placeholder="Enter category name"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <DialogFooter>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => setIsAddOpen(false)}
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          type="submit"
-                          disabled={addForm.formState.isSubmitting}
-                        >
-                          Add Category
-                        </Button>
-                      </DialogFooter>
-                    </form>
-                  </Form>
-                </DialogContent>
-              </Dialog>
-            </div>
-          </div>
-
-          {/* Category List */}
-          <div className="w-full overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-gray-100 border-b border-slate-200">
-                  <TableHead className="text-center text-slate-900 text-sm font-medium">
-                    Category
-                  </TableHead>
-                  <TableHead className="hidden md:table-cell text-center text-slate-900 text-sm font-medium w-[120px]">
-                    Articles
-                  </TableHead>
-                  <TableHead className="hidden md:table-cell text-center text-slate-900 text-sm font-medium w-[200px]">
-                    Created at
-                  </TableHead>
-                  <TableHead className="text-center text-slate-900 text-sm font-medium w-[180px]">
-                    Action
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredCategories.map((category) => (
-                  <TableRow
-                    key={category.id}
-                    className="bg-gray-50 border-b border-slate-200 last:border-b-0"
-                  >
-                    <TableCell className="p-4">
-                      <div className="space-y-1">
-                        <h3 className="text-sm font-medium text-gray-900 md:text-slate-600 md:font-normal md:text-center">
-                          {category.name}
-                        </h3>
-                        <div className="md:hidden space-y-1">
-                          <div className="text-sm text-gray-600">
-                            {category.description}
-                          </div>
-                          <div className="text-xs text-gray-500 flex items-center gap-2">
-                            <Badge
-                              variant={
-                                category.articleCount > 0
-                                  ? 'default'
-                                  : 'secondary'
-                              }
-                            >
-                              {category.articleCount} articles
-                            </Badge>
-                            <span>Created: {category.createdAt}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell text-center p-4">
-                      <Badge
-                        variant={
-                          category.articleCount > 0 ? 'default' : 'secondary'
-                        }
-                      >
-                        {category.articleCount}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell text-center p-4">
-                      <div className="text-slate-600 text-sm">
-                        {category.createdAt}
-                      </div>
-                    </TableCell>
-                    <TableCell className="p-4">
-                      <div className="flex gap-2 md:gap-1 md:justify-center">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openEditModal(category)}
-                          className="flex-1 md:flex-none h-8 md:h-auto px-3 md:px-1 text-xs
-                                                             md:bg-transparent md:border-0 md:text-blue-600 md:underline md:hover:text-blue-700 md:hover:bg-transparent"
-                        >
-                          <Edit className="w-4 h-4 md:w-3 md:h-3 mr-1 md:mr-0.5" />
-                          <span>Edit</span>
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-8 md:h-auto px-3 md:px-1 text-xs text-red-600 hover:text-red-700 hover:bg-red-50
-                                                             md:bg-transparent md:border-0 md:text-red-500 md:underline md:hover:text-red-600 md:hover:bg-transparent"
-                          onClick={() => openDeleteModal(category)}
-                        >
-                          <Trash2 className="w-4 h-4 md:w-3 md:h-3 mr-1 md:mr-0.5" />
-                          <span>Delete</span>
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-
-          <Pagination currentPage={1} totalPages={5} />
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={addForm.formState.isSubmitting}
+                    >
+                      Add Category
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
+
+      {/* Category List */}
+      <div className="w-full">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-gray-100 border-b border-slate-200">
+              <TableHead className="text-center text-slate-900 text-sm font-medium">
+                Category
+              </TableHead>
+              <TableHead className="hidden md:table-cell text-center text-slate-900 text-sm font-medium w-[120px]">
+                Articles
+              </TableHead>
+              <TableHead className="hidden md:table-cell text-center text-slate-900 text-sm font-medium w-[200px]">
+                Created at
+              </TableHead>
+              <TableHead className="text-center text-slate-900 text-sm font-medium w-[180px]">
+                Action
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredCategories.map((category) => (
+              <TableRow
+                key={category.id}
+                className="bg-gray-50 border-b border-slate-200 last:border-b-0"
+              >
+                <TableCell className="p-4">
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-medium text-gray-900 md:text-slate-600 md:font-normal md:text-center">
+                      {category.name}
+                    </h3>
+                    <div className="md:hidden space-y-1">
+                      <div className="text-sm text-gray-600">
+                        {category.description}
+                      </div>
+                      <div className="text-xs text-gray-500 flex items-center gap-2">
+                        <Badge
+                          variant={
+                            category.articleCount > 0 ? 'default' : 'secondary'
+                          }
+                        >
+                          {category.articleCount} articles
+                        </Badge>
+                        <span>Created: {category.createdAt}</span>
+                      </div>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell className="hidden md:table-cell text-center p-4">
+                  <Badge
+                    variant={
+                      category.articleCount > 0 ? 'default' : 'secondary'
+                    }
+                  >
+                    {category.articleCount}
+                  </Badge>
+                </TableCell>
+                <TableCell className="hidden md:table-cell text-center p-4">
+                  <div className="text-slate-600 text-sm">
+                    {category.createdAt}
+                  </div>
+                </TableCell>
+                <TableCell className="p-4">
+                  <div className="flex gap-2 md:gap-1 md:justify-center">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openEditModal(category)}
+                      className="flex-1 md:flex-none h-8 md:h-auto px-3 md:px-1 text-xs
+                                                             md:bg-transparent md:border-0 md:text-blue-600 md:underline md:hover:text-blue-700 md:hover:bg-transparent"
+                    >
+                      <Edit className="w-4 h-4 md:w-3 md:h-3 mr-1 md:mr-0.5" />
+                      <span>Edit</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 md:h-auto px-3 md:px-1 text-xs text-red-600 hover:text-red-700 hover:bg-red-50
+                                                             md:bg-transparent md:border-0 md:text-red-500 md:underline md:hover:text-red-600 md:hover:bg-transparent"
+                      onClick={() => openDeleteModal(category)}
+                    >
+                      <Trash2 className="w-4 h-4 md:w-3 md:h-3 mr-1 md:mr-0.5" />
+                      <span>Delete</span>
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      <Pagination currentPage={1} totalPages={5} />
 
       {/* Edit Modal */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
