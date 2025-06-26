@@ -40,21 +40,21 @@ export default function DeleteConfirmationModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] mx-4">
+      <DialogContent className="mx-4 sm:max-w-[425px]">
         <DialogHeader>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="flex items-center justify-center w-10 h-10 bg-red-100 rounded-full">
-              <Trash2 className="w-5 h-5 text-red-600" />
+          <div className="mb-2 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
+              <Trash2 className="h-5 w-5 text-red-600" />
             </div>
             <DialogTitle className="text-lg font-semibold text-gray-900">
               {title || defaultTitle}
             </DialogTitle>
           </div>
-          <DialogDescription className="text-sm text-gray-600 text-left">
+          <DialogDescription className="text-left text-sm text-gray-600">
             {description || defaultDescription}
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter className="gap-3 mt-6">
+        <DialogFooter className="mt-6 gap-3">
           <Button
             variant="outline"
             onClick={onClose}
@@ -65,7 +65,7 @@ export default function DeleteConfirmationModal({
           </Button>
           <Button
             onClick={onConfirm}
-            className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+            className="flex-1 bg-red-600 text-white hover:bg-red-700"
             disabled={isLoading}
           >
             {isLoading ? 'Deleting...' : `Delete ${itemType}`}

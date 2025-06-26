@@ -51,24 +51,24 @@ export default function PreviewArticle() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="border-b border-slate-200 px-4 sm:px-8 lg:px-[60px] py-6 lg:py-8 flex justify-between items-center">
+      <header className="flex items-center justify-between border-b border-slate-200 px-4 py-6 sm:px-8 lg:px-[60px] lg:py-8">
         <Image
           src="/Logo.svg"
           alt="Logo"
           width={134}
           height={24}
           priority
-          className="h-5 lg:h-6 w-auto"
+          className="h-5 w-auto lg:h-6"
         />
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 lg:w-8 lg:h-8 bg-blue-200 rounded-full flex items-center justify-center">
-            <span className="text-blue-900 text-sm lg:text-base font-medium">
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-200 lg:h-8 lg:w-8">
+            <span className="text-sm font-medium text-blue-900 lg:text-base">
               J
             </span>
           </div>
           <Link
             href="/admin/profile"
-            className="text-slate-900 text-sm lg:text-base font-medium underline"
+            className="text-sm font-medium text-slate-900 underline lg:text-base"
           >
             James Dean
           </Link>
@@ -76,16 +76,16 @@ export default function PreviewArticle() {
       </header>
 
       {/* Article Content */}
-      <main className="px-4 sm:px-8 lg:px-20 xl:px-40 py-6 lg:py-10">
-        <article className="max-w-4xl mx-auto">
+      <main className="px-4 py-6 sm:px-8 lg:px-20 lg:py-10 xl:px-40">
+        <article className="mx-auto max-w-4xl">
           {/* Article Header */}
-          <div className="text-center mb-6 lg:mb-10">
-            <div className="flex flex-col sm:flex-row justify-center items-center gap-1 text-sm text-slate-600 mb-3 lg:mb-4">
+          <div className="mb-6 text-center lg:mb-10">
+            <div className="mb-3 flex flex-col items-center justify-center gap-1 text-sm text-slate-600 sm:flex-row lg:mb-4">
               <span>February 4, 2025</span>
               <span className="hidden sm:inline">•</span>
               <span>Created by Admin</span>
             </div>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-slate-900 leading-tight lg:leading-9 mb-3 lg:mb-4 px-2">
+            <h1 className="mb-3 px-2 text-xl leading-tight font-semibold text-slate-900 sm:text-2xl lg:mb-4 lg:text-3xl lg:leading-9">
               Figma&apos;s New Dev Mode: A Game-Changer for Designers &
               Developers
             </h1>
@@ -99,7 +99,7 @@ export default function PreviewArticle() {
               alt="Figma Dev Mode article featured image"
               width={1120}
               height={480}
-              className="w-full h-[240px] sm:h-[320px] lg:h-[480px] object-cover rounded-lg lg:rounded-xl"
+              className="h-[240px] w-full rounded-lg object-cover sm:h-[320px] lg:h-[480px] lg:rounded-xl"
             />
           </div>
 
@@ -112,12 +112,12 @@ export default function PreviewArticle() {
       </main>
 
       {/* Related Articles */}
-      <section className="px-4 sm:px-8 lg:px-20 xl:px-[180px] pt-6 lg:pt-10 pb-12 lg:pb-[100px]">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-lg lg:text-xl font-bold text-slate-900 mb-4 lg:mb-6">
+      <section className="px-4 pt-6 pb-12 sm:px-8 lg:px-20 lg:pt-10 lg:pb-[100px] xl:px-[180px]">
+        <div className="mx-auto max-w-6xl">
+          <h2 className="mb-4 text-lg font-bold text-slate-900 lg:mb-6 lg:text-xl">
             Other articles
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-10">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-10">
             {[1, 2, 3].map((i) => (
               <Card key={i} className="overflow-hidden">
                 <Image
@@ -125,18 +125,18 @@ export default function PreviewArticle() {
                   alt={`Related article ${i}`}
                   width={333}
                   height={240}
-                  className="w-full h-48 lg:h-60 object-cover"
+                  className="h-48 w-full object-cover lg:h-60"
                 />
                 <CardContent className="p-3 lg:p-4">
-                  <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
+                  <div className="mb-2 flex items-center gap-2 text-xs text-slate-500">
                     <span>February {i}, 2025</span>
                     <span>•</span>
                     <span>5 min read</span>
                   </div>
-                  <h3 className="text-sm font-semibold text-slate-900 mb-2">
+                  <h3 className="mb-2 text-sm font-semibold text-slate-900">
                     Related Article Title {i}
                   </h3>
-                  <p className="text-xs text-slate-600 line-clamp-2">
+                  <p className="line-clamp-2 text-xs text-slate-600">
                     This is a brief description of the related article that
                     provides context about its content.
                   </p>

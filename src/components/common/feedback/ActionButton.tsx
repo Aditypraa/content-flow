@@ -36,7 +36,7 @@ export default function ActionButton({
     if (loading) {
       return (
         <>
-          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           {loadingText}
         </>
       );
@@ -45,13 +45,13 @@ export default function ActionButton({
     if (icon) {
       return iconPosition === 'left' ? (
         <>
-          <span className="w-4 h-4 mr-2 flex items-center">{icon}</span>
+          <span className="mr-2 flex h-4 w-4 items-center">{icon}</span>
           {children}
         </>
       ) : (
         <>
           {children}
-          <span className="w-4 h-4 ml-2 flex items-center">{icon}</span>
+          <span className="ml-2 flex h-4 w-4 items-center">{icon}</span>
         </>
       );
     }

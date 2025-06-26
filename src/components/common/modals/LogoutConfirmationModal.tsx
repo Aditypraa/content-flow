@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { useRouter } from 'next/navigation';
 import {
   Dialog,
   DialogContent,
@@ -16,45 +15,38 @@ import { LogOut } from 'lucide-react';
 interface LogoutConfirmationModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onConfirm: () => void; // <-- TAMBAHKAN PROPS INI
 }
 
 export default function LogoutConfirmationModal({
   isOpen,
   onClose,
+  onConfirm, // <-- Terima props baru
 }: LogoutConfirmationModalProps) {
-  const router = useRouter();
-
-  const handleLogout = () => {
-    // Clear any authentication tokens/session data here
-    // For now, we'll just redirect to login
-    router.push('/auth/login');
-    onClose();
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="flex items-center justify-center w-10 h-10 bg-red-100 rounded-full">
-              <LogOut className="w-5 h-5 text-red-600" />
+          <div className="mb-2 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
+              <LogOut className="h-5 w-5 text-red-600" />
             </div>
             <DialogTitle className="text-lg font-semibold text-gray-900">
               Confirm Logout
             </DialogTitle>
           </div>
-          <DialogDescription className="text-sm text-gray-600 text-left">
-            Are you sure you want to log out? You will need to log in again to
-            access the admin panel.
+          <DialogDescription className="text-left text-sm text-gray-600">
+            Are you sure you want to log out? You will be returned to the login
+            page.
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter className="gap-3 mt-6">
+        <DialogFooter className="mt-6 gap-3">
           <Button variant="outline" onClick={onClose} className="flex-1">
             Cancel
           </Button>
           <Button
-            onClick={handleLogout}
-            className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+            onClick={onConfirm} // <-- GUNAKAN onConfirm DI SINI
+            className="flex-1 bg-red-600 text-white hover:bg-red-700"
           >
             Logout
           </Button>

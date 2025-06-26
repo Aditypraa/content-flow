@@ -3,16 +3,18 @@ node_modules/
 
 # Ignore build output
 .next/
+dist/
+build/
 
 # Ignore public files
 public/
 
 # Ignore env files
-.env
-.env.local
-.env.development
-.env.production
-.env.test
+.env*
+!.env.example
 
 # Ignore any specific file you don't want Prettier to format
 README.md
+
+# Log files
+*.log

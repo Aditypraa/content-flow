@@ -13,7 +13,7 @@ export default function ArticleContentLayout({
 }: ArticleContentProps) {
   return (
     <div
-      className={`prose prose-lg max-w-none article-content ${className}`}
+      className={`prose prose-lg article-content max-w-none ${className}`}
       dangerouslySetInnerHTML={{ __html: content }}
     />
   );

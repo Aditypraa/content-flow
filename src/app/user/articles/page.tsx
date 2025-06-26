@@ -1,3 +1,6 @@
+// app/user/articles/page.tsx
+'use client'; // Pastikan ini tetap ada jika Anda menggunakan hooks atau interaktivitas klien
+
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,8 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import UserLayout from '@/components/layouts/UserLayout';
-import UserNavbar from '@/components/common/navigation/UserNavbar';
+// import UserLayout from '@/components/layouts/UserLayout'; // Hapus import ini
 import Image from 'next/image';
 import Pagination from '@/components/common/feedback/Pagination';
 import { ArrowRight } from 'lucide-react';
@@ -65,24 +67,22 @@ const articles = [
 
 export default function ArticlesUserPage() {
   return (
-    <UserLayout backgroundColor="white" showNavbar={false}>
-      {/* Header Section */}
-      <div className="bg-blue-600/90 h-[500px] relative overflow-hidden">
-        <UserNavbar />
-        <div className="max-w-4xl mx-auto px-4 py-12 text-center">
+    <>
+      <div className="relative h-[500px] overflow-hidden bg-blue-600/90">
+        <div className="mx-auto max-w-4xl px-4 py-12 text-center">
           <div className="space-y-6">
             <div className="space-y-3">
-              <div className="text-white text-base font-bold">Blog genzet</div>
-              <h1 className="text-white text-5xl font-medium leading-tight">
+              <div className="text-base font-bold text-white">Blog genzet</div>
+              <h1 className="text-5xl leading-tight font-medium text-white">
                 The Journal : Design Resources,
                 <br />
                 Interviews, and Industry News
               </h1>
-              <p className="text-white text-2xl">
+              <p className="text-2xl text-white">
                 Your daily dose of design insights!
               </p>
             </div>
-            <div className="flex gap-2 justify-center items-center">
+            <div className="flex items-center justify-center gap-2">
               <Select>
                 <SelectTrigger className="w-[200px] bg-white">
                   <SelectValue placeholder="Select category" />
@@ -108,8 +108,8 @@ export default function ArticlesUserPage() {
       </div>
 
       {/* Articles Grid */}
-      <div className="max-w-7xl mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="mx-auto max-w-7xl px-4 py-16">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {articles.map((article) => (
             <Card key={article.id} className="overflow-hidden">
               <div className="h-48 bg-gray-200">
@@ -118,15 +118,15 @@ export default function ArticlesUserPage() {
                   alt={article.title}
                   width={400}
                   height={192}
-                  className="w-full h-full object-cover"
+                  className="h-full w-full object-cover"
                 />
               </div>
               <div className="p-6">
-                <div className="text-sm text-blue-600 mb-2">
+                <div className="mb-2 text-sm text-blue-600">
                   {article.category}
                 </div>
-                <h3 className="text-xl font-semibold mb-2">{article.title}</h3>
-                <p className="text-gray-600 mb-4">{article.description}</p>
+                <h3 className="mb-2 text-xl font-semibold">{article.title}</h3>
+                <p className="mb-4 text-gray-600">{article.description}</p>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500">{article.date}</span>
                   <Button
@@ -134,7 +134,7 @@ export default function ArticlesUserPage() {
                     size="sm"
                     aria-label="Read more about article"
                   >
-                    Read More <ArrowRight className="w-4 h-4 ml-1" />
+                    Read More <ArrowRight className="ml-1 h-4 w-4" />
                   </Button>
                 </div>
               </div>
@@ -147,6 +147,8 @@ export default function ArticlesUserPage() {
       <div className="mt-12">
         <Pagination currentPage={2} totalPages={3} />
       </div>
-    </UserLayout>
+    </>
+    // Hapus pembungkus UserLayout di sini
+    // </UserLayout>
   );
 }

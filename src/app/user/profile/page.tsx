@@ -1,4 +1,4 @@
-'use client';
+'use client'; // Pastikan ini tetap ada karena Anda menggunakan hooks
 
 import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
@@ -25,7 +25,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import UserLayout from '@/components/layouts/UserLayout';
+// import UserLayout from '@/components/layouts/UserLayout'; // Hapus import ini
 
 const profileSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
@@ -78,149 +78,165 @@ export default function UserProfile() {
     toast.success('Password updated successfully!');
     passwordForm.reset();
   };
+
   return (
-    <UserLayout
-      backgroundColor="gray"
-      showNavbarBorder={true}
-      navbarProps={{ isLoggedIn: true, userName: 'John Doe' }}
-    >
-      {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-4 py-12">
-        <div className="space-y-6">
-          {/* Header */}
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">User Profile</h1>
-            <p className="text-gray-600 mt-1">
-              Manage your personal information and preferences
-            </p>
-          </div>
+    // Hapus pembungkus UserLayout di sini
+    // <UserLayout
+    //   backgroundColor="gray"
+    //   showNavbarBorder={true}
+    //   navbarProps={{ isLoggedIn: true, userName: 'John Doe' }}
+    // >
+    <div className="mx-auto max-w-4xl px-4 py-12">
+      <div className="space-y-6">
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">User Profile</h1>
+          <p className="mt-1 text-gray-600">
+            Manage your personal information and preferences
+          </p>
+        </div>
 
-          {/* Profile Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Profile Information</CardTitle>
-              <CardDescription>
-                Update your personal details and profile settings
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center space-x-6">
-                <Avatar className="w-24 h-24">
-                  <AvatarImage src="" alt="Profile picture" />
-                  <AvatarFallback className="text-2xl font-semibold bg-gray-200 text-gray-600">
-                    JD
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <h2 className="text-2xl font-semibold text-gray-900">
-                    John Doe
-                  </h2>
-                  <p className="text-gray-600">john.doe@example.com</p>
-                  <Button variant="outline" size="sm" className="mt-2">
-                    Change Avatar
-                  </Button>
-                </div>
+        {/* Profile Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Profile Information</CardTitle>
+            <CardDescription>
+              Update your personal details and profile settings
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex items-center space-x-6">
+              <Avatar className="h-24 w-24">
+                <AvatarImage src="" alt="Profile picture" />
+                <AvatarFallback className="bg-gray-200 text-2xl font-semibold text-gray-600">
+                  JD
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <h2 className="text-2xl font-semibold text-gray-900">
+                  John Doe
+                </h2>
+                <p className="text-gray-600">john.doe@example.com</p>
+                <Button variant="outline" size="sm" className="mt-2">
+                  Change Avatar
+                </Button>
               </div>
+            </div>
 
-              <Separator />
+            <Separator />
 
-              <Form {...profileForm}>
-                <form
-                  onSubmit={profileForm.handleSubmit(onProfileSubmit)}
-                  className="space-y-6"
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField
-                      control={profileForm.control}
-                      name="firstName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>First Name</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={profileForm.control}
-                      name="lastName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Last Name</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
+            <Form {...profileForm}>
+              <form
+                onSubmit={profileForm.handleSubmit(onProfileSubmit)}
+                className="space-y-6"
+              >
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <FormField
                     control={profileForm.control}
-                    name="email"
+                    name="firstName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email</FormLabel>
+                        <FormLabel>First Name</FormLabel>
                         <FormControl>
-                          <Input {...field} type="email" />
+                          <Input {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-
                   <FormField
                     control={profileForm.control}
-                    name="bio"
+                    name="lastName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Bio</FormLabel>
+                        <FormLabel>Last Name</FormLabel>
                         <FormControl>
-                          <Textarea
-                            {...field}
-                            placeholder="Tell us about yourself..."
-                            rows={4}
-                          />
+                          <Input {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+                </div>
 
-                  <Button
-                    type="submit"
-                    disabled={profileForm.formState.isSubmitting}
-                  >
-                    Save Profile Changes
-                  </Button>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
+                <FormField
+                  control={profileForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="email" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-          {/* Security Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Security Settings</CardTitle>
-              <CardDescription>
-                Manage your password and account security
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <Form {...passwordForm}>
-                <form
-                  onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}
-                  className="space-y-6"
+                <FormField
+                  control={profileForm.control}
+                  name="bio"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Bio</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          placeholder="Tell us about yourself..."
+                          rows={4}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button
+                  type="submit"
+                  disabled={profileForm.formState.isSubmitting}
                 >
+                  Save Profile Changes
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+
+        {/* Security Settings */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Security Settings</CardTitle>
+            <CardDescription>
+              Manage your password and account security
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <Form {...passwordForm}>
+              <form
+                onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}
+                className="space-y-6"
+              >
+                <FormField
+                  control={passwordForm.control}
+                  name="currentPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Current Password</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="password" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <FormField
                     control={passwordForm.control}
-                    name="currentPassword"
+                    name="newPassword"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Current Password</FormLabel>
+                        <FormLabel>New Password</FormLabel>
                         <FormControl>
                           <Input {...field} type="password" />
                         </FormControl>
@@ -228,118 +244,102 @@ export default function UserProfile() {
                       </FormItem>
                     )}
                   />
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField
-                      control={passwordForm.control}
-                      name="newPassword"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>New Password</FormLabel>
-                          <FormControl>
-                            <Input {...field} type="password" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={passwordForm.control}
-                      name="confirmPassword"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Confirm New Password</FormLabel>
-                          <FormControl>
-                            <Input {...field} type="password" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <Button
-                    type="submit"
-                    disabled={passwordForm.formState.isSubmitting}
-                  >
-                    Update Password
-                  </Button>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
-
-          {/* Notification Preferences */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Notification Preferences</CardTitle>
-              <CardDescription>
-                Choose which notifications you want to receive
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Email Notifications</p>
-                  <p className="text-sm text-gray-600">
-                    Receive email updates about new articles
-                  </p>
+                  <FormField
+                    control={passwordForm.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirm New Password</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="password" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
-                <Switch defaultChecked />
-              </div>
 
-              <Separator />
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Push Notifications</p>
-                  <p className="text-sm text-gray-600">
-                    Receive push notifications on your device
-                  </p>
-                </div>
-                <Switch />
-              </div>
-
-              <Separator />
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Newsletter</p>
-                  <p className="text-sm text-gray-600">
-                    Subscribe to our weekly newsletter
-                  </p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Account Actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Account Actions</CardTitle>
-              <CardDescription>Manage your account settings</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex gap-4">
-                <Button>Save Changes</Button>
-                <Button variant="outline">Cancel</Button>
-              </div>
-
-              <Separator />
-
-              <div className="pt-4">
-                <p className="text-sm text-gray-600 mb-2">
-                  Danger Zone: These actions cannot be undone
-                </p>
-                <Button variant="destructive" size="sm">
-                  Delete Account
+                <Button
+                  type="submit"
+                  disabled={passwordForm.formState.isSubmitting}
+                >
+                  Update Password
                 </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+
+        {/* Notification Preferences */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Notification Preferences</CardTitle>
+            <CardDescription>
+              Choose which notifications you want to receive
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Email Notifications</p>
+                <p className="text-sm text-gray-600">
+                  Receive email updates about new articles
+                </p>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+              <Switch defaultChecked />
+            </div>
+
+            <Separator />
+
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Push Notifications</p>
+                <p className="text-sm text-gray-600">
+                  Receive push notifications on your device
+                </p>
+              </div>
+              <Switch />
+            </div>
+
+            <Separator />
+
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Newsletter</p>
+                <p className="text-sm text-gray-600">
+                  Subscribe to our weekly newsletter
+                </p>
+              </div>
+              <Switch defaultChecked />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Account Actions */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Account Actions</CardTitle>
+            <CardDescription>Manage your account settings</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex gap-4">
+              <Button>Save Changes</Button>
+              <Button variant="outline">Cancel</Button>
+            </div>
+
+            <Separator />
+
+            <div className="pt-4">
+              <p className="mb-2 text-sm text-gray-600">
+                Danger Zone: These actions cannot be undone
+              </p>
+              <Button variant="destructive" size="sm">
+                Delete Account
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-    </UserLayout>
+    </div>
   );
 }

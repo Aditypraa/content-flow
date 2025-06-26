@@ -70,7 +70,7 @@ export default function SearchInput({
   return (
     <div className={`relative ${className}`}>
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
         <Input
           type="search"
           placeholder={placeholder}
@@ -79,7 +79,7 @@ export default function SearchInput({
           onKeyDown={handleKeyDown}
           disabled={disabled}
           autoFocus={autoFocus}
-          className="pl-10 pr-10"
+          className="pr-10 pl-10"
           aria-label={placeholder}
         />
         {showClearButton && value && (
@@ -89,10 +89,10 @@ export default function SearchInput({
             size="sm"
             onClick={handleClear}
             disabled={disabled}
-            className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-gray-100"
+            className="absolute top-1/2 right-1 h-8 w-8 -translate-y-1/2 transform p-0 hover:bg-gray-100"
             aria-label="Clear search"
           >
-            <X className="w-4 h-4" />
+            <X className="h-4 w-4" />
           </Button>
         )}
       </div>

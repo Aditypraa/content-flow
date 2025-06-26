@@ -1,7 +1,10 @@
+// app/user/articles/[id]/page.tsx
+'use client'; // Pastikan ini tetap ada jika Anda menggunakan hooks atau interaktivitas klien
+
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
-import UserLayout from '@/components/layouts/UserLayout';
+// import UserLayout from '@/components/layouts/UserLayout'; // Hapus import ini
 import ArticleContent from '@/components/layouts/ArticleContentLayout';
 
 export default function DetailArticle() {
@@ -48,127 +51,123 @@ export default function DetailArticle() {
         <p>💬 <s>What do you think of Dev Mode?</s> Have you tried it yet? <a href="https://figma.com">Share your experience</a> in the comments!</p>
     `;
   return (
-    <UserLayout
-      backgroundColor="white"
-      showNavbarBorder={true}
-      navbarProps={{ showAuthButtons: true }}
-      footerClassName="mt-16"
-    >
-      {/* Article Content */}
-      <div className="max-w-4xl mx-auto px-4 py-12">
-        <article className="space-y-8">
-          {/* Article Meta */}
-          <div className="text-center space-y-4">
-            <div className="flex items-center justify-center gap-4 text-sm text-gray-500">
-              <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full">
-                Technology
-              </span>
-              <span>Published on Jan 15, 2024</span>
-              <span>By John Doe</span>
-            </div>
-
-            {/* Article Title */}
-            <h1 className="text-4xl font-bold text-gray-900 leading-tight">
-              Figma&apos;s New Dev Mode: A Game-Changer for Designers &
-              Developers
-            </h1>
+    // Hapus pembungkus UserLayout di sini
+    // <UserLayout
+    //   backgroundColor="white"
+    //   showNavbarBorder={true}
+    //   navbarProps={{ showAuthButtons: true }}
+    // >
+    <div className="mx-auto max-w-4xl px-4 py-12">
+      <article className="space-y-8">
+        {/* Article Meta */}
+        <div className="space-y-4 text-center">
+          <div className="flex items-center justify-center gap-4 text-sm text-gray-500">
+            <span className="rounded-full bg-blue-100 px-3 py-1 text-blue-600">
+              Technology
+            </span>
+            <span>Published on Jan 15, 2024</span>
+            <span>By John Doe</span>
           </div>
 
-          {/* Article Image */}
-          <div className="w-full h-96 bg-gray-200 rounded-xl overflow-hidden">
-            <Image
-              src="https://placehold.co/1120x480"
-              alt="Figma Dev Mode Article"
-              width={1120}
-              height={480}
-              className="w-full h-full object-cover"
-            />
+          {/* Article Title */}
+          <h1 className="text-4xl leading-tight font-bold text-gray-900">
+            Figma&apos;s New Dev Mode: A Game-Changer for Designers & Developers
+          </h1>
+        </div>
+
+        {/* Article Image */}
+        <div className="h-96 w-full overflow-hidden rounded-xl bg-gray-200">
+          <Image
+            src="https://placehold.co/1120x480"
+            alt="Figma Dev Mode Article"
+            width={1120}
+            height={480}
+            className="h-full w-full object-cover"
+          />
+        </div>
+
+        {/* Article Body */}
+        <ArticleContent content={articleContent} className="space-y-6" />
+
+        {/* Related Articles */}
+        <div className="mt-12 border-t pt-8">
+          <h2 className="mb-6 text-2xl font-semibold">Related Articles</h2>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            {/* Related Article 1 */}
+            <Card className="overflow-hidden">
+              <div className="h-48 bg-gray-200">
+                <Image
+                  src="https://placehold.co/333x240"
+                  alt="Related article"
+                  width={333}
+                  height={240}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <div className="p-4">
+                <h3 className="mb-2 font-semibold">UI Design Best Practices</h3>
+                <p className="mb-3 text-sm text-gray-600">
+                  Essential principles for creating beautiful user interfaces...
+                </p>
+                <Button variant="ghost" size="sm" className="h-auto p-0">
+                  Read More
+                </Button>
+              </div>
+            </Card>
+
+            {/* Related Article 2 */}
+            <Card className="overflow-hidden">
+              <div className="h-48 bg-gray-200">
+                <Image
+                  src="https://placehold.co/333x240"
+                  alt="Related article"
+                  width={333}
+                  height={240}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <div className="p-4">
+                <h3 className="mb-2 font-semibold">Modern CSS Techniques</h3>
+                <p className="mb-3 text-sm text-gray-600">
+                  Explore the latest CSS features and techniques...
+                </p>
+                <Button variant="ghost" size="sm" className="h-auto p-0">
+                  Read More
+                </Button>
+              </div>
+            </Card>
+
+            {/* Related Article 3 */}
+            <Card className="overflow-hidden">
+              <div className="h-48 bg-gray-200">
+                <Image
+                  src="https://placehold.co/333x240"
+                  alt="Related article"
+                  width={333}
+                  height={240}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <div className="p-4">
+                <h3 className="mb-2 font-semibold">React Performance Tips</h3>
+                <p className="mb-3 text-sm text-gray-600">
+                  Optimize your React applications for better performance...
+                </p>
+                <Button variant="ghost" size="sm" className="h-auto p-0">
+                  Read More
+                </Button>
+              </div>
+            </Card>
           </div>
+        </div>
 
-          {/* Article Body */}
-          <ArticleContent content={articleContent} className="space-y-6" />
-
-          {/* Related Articles */}
-          <div className="border-t pt-8 mt-12">
-            <h2 className="text-2xl font-semibold mb-6">Related Articles</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Related Article 1 */}
-              <Card className="overflow-hidden">
-                <div className="h-48 bg-gray-200">
-                  <Image
-                    src="https://placehold.co/333x240"
-                    alt="Related article"
-                    width={333}
-                    height={240}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold mb-2">
-                    UI Design Best Practices
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-3">
-                    Essential principles for creating beautiful user
-                    interfaces...
-                  </p>
-                  <Button variant="ghost" size="sm" className="p-0 h-auto">
-                    Read More
-                  </Button>
-                </div>
-              </Card>
-
-              {/* Related Article 2 */}
-              <Card className="overflow-hidden">
-                <div className="h-48 bg-gray-200">
-                  <Image
-                    src="https://placehold.co/333x240"
-                    alt="Related article"
-                    width={333}
-                    height={240}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold mb-2">Modern CSS Techniques</h3>
-                  <p className="text-sm text-gray-600 mb-3">
-                    Explore the latest CSS features and techniques...
-                  </p>
-                  <Button variant="ghost" size="sm" className="p-0 h-auto">
-                    Read More
-                  </Button>
-                </div>
-              </Card>
-
-              {/* Related Article 3 */}
-              <Card className="overflow-hidden">
-                <div className="h-48 bg-gray-200">
-                  <Image
-                    src="https://placehold.co/333x240"
-                    alt="Related article"
-                    width={333}
-                    height={240}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold mb-2">React Performance Tips</h3>
-                  <p className="text-sm text-gray-600 mb-3">
-                    Optimize your React applications for better performance...
-                  </p>
-                  <Button variant="ghost" size="sm" className="p-0 h-auto">
-                    Read More
-                  </Button>
-                </div>
-              </Card>
-            </div>
-          </div>
-
-          {/* Back to Articles */}
-          <div className="text-center pt-8">
-            <Button variant="outline">← Back to Articles</Button>
-          </div>
-        </article>
-      </div>
-    </UserLayout>
+        {/* Back to Articles */}
+        <div className="pt-8 text-center">
+          <Button variant="outline">← Back to Articles</Button>
+        </div>
+      </article>
+    </div>
+    // Hapus pembungkus UserLayout di sini
+    // </UserLayout>
   );
 }

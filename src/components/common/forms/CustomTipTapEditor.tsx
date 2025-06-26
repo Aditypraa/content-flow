@@ -1,6 +1,8 @@
+// components/common/forms/CustomTipTapEditor.tsx
+
 'use client';
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -33,6 +35,8 @@ import {
   AlignCenter,
   AlignRight,
 } from 'lucide-react';
+import axiosInstance from '@/lib/api/axios'; // Pastikan axiosInstance diimpor
+import { toast } from 'sonner';
 
 interface CustomTipTapEditorProps {
   content?: string;
@@ -45,6 +49,8 @@ export default function CustomTipTapEditor({
   onChange,
   variant = 'default',
 }: CustomTipTapEditorProps) {
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -58,8 +64,11 @@ export default function CustomTipTapEditor({
       Underline,
       Link.configure({
         openOnClick: false,
+        autolink: true,
       }),
-      Image,
+      Image.configure({
+        inline: false, // Gambar sebagai block-level element
+      }),
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
@@ -104,96 +113,86 @@ export default function CustomTipTapEditor({
     return null;
   }
 
-  const handleBold = () => {
-    editor.chain().focus().toggleBold().run();
+  // Fungsi untuk upload gambar ke server
+  const uploadImageToServer = async (file: File): Promise<string | null> => {
+    const formData = new FormData();
+    formData.append('image', file); // 'image' adalah key yang diharapkan backend
+
+    try {
+      // KUNCI PERBAIKAN: Endpoint disesuaikan dengan dokumentasi Anda
+      const response = await axiosInstance.post('/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      // Sesuai dokumentasi, response berisi { "imageUrl": "..." }
+      if (response.data && response.data.imageUrl) {
+        return response.data.imageUrl;
+      }
+      toast.error('Invalid response from image upload server.');
+      return null;
+    } catch (error) {
+      console.error('Image upload failed:', error);
+      toast.error('Image upload failed. Please try again.');
+      return null;
+    }
   };
 
-  const handleItalic = () => {
-    editor.chain().focus().toggleItalic().run();
-  };
-
-  const handleUnderline = () => {
-    editor.chain().focus().toggleUnderline().run();
-  };
-
-  const handleH1 = () => {
-    editor.chain().focus().toggleHeading({ level: 1 }).run();
-  };
-
-  const handleH2 = () => {
-    editor.chain().focus().toggleHeading({ level: 2 }).run();
-  };
-
-  const handleH3 = () => {
-    editor.chain().focus().toggleHeading({ level: 3 }).run();
-  };
+  // --- Toolbar Handlers ---
 
   const handleLink = () => {
-    const url = window.prompt('Enter URL:');
-    if (url) {
-      editor.chain().focus().setLink({ href: url }).run();
+    const previousUrl = editor.getAttributes('link').href;
+    const url = window.prompt('Enter URL:', previousUrl);
+
+    if (url === null) {
+      return;
     }
-  };
-
-  const handleImage = () => {
-    const url = window.prompt('Enter image URL:');
-    if (url) {
-      editor.chain().focus().setImage({ src: url }).run();
+    if (url === '') {
+      editor.chain().focus().extendMarkRange('link').unsetLink().run();
+      return;
     }
+    editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
   };
 
-  const handleBulletList = () => {
-    editor.chain().focus().toggleBulletList().run();
+  const handleImageUploadClick = () => {
+    imageInputRef.current?.click();
   };
 
-  const handleOrderedList = () => {
-    editor.chain().focus().toggleOrderedList().run();
-  };
-
-  const handleBlockquote = () => {
-    editor.chain().focus().toggleBlockquote().run();
-  };
-
-  const handleStrike = () => {
-    editor.chain().focus().toggleStrike().run();
-  };
-
-  const handleCode = () => {
-    editor.chain().focus().toggleCode().run();
-  };
-
-  const handleAlignLeft = () => {
-    editor.chain().focus().setTextAlign('left').run();
-  };
-
-  const handleAlignCenter = () => {
-    editor.chain().focus().setTextAlign('center').run();
-  };
-
-  const handleAlignRight = () => {
-    editor.chain().focus().setTextAlign('right').run();
+  const handleFileSelectAndUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (file && editor) {
+      toast.info('Uploading image...');
+      const imageUrl = await uploadImageToServer(file);
+      if (imageUrl) {
+        editor.chain().focus().setImage({ src: imageUrl }).run();
+        toast.success('Image uploaded successfully!');
+      }
+    }
+    if (event.target) {
+      event.target.value = '';
+    }
   };
 
   return (
     <div
       className={
-        variant === 'create' ? 'h-full flex flex-col' : 'border rounded-lg'
+        variant === 'create' ? 'flex h-full flex-col' : 'rounded-lg border'
       }
     >
-      {/* Editor Toolbar - Enhanced with icons and more tools */}
+      {/* Editor Toolbar */}
       <div
         className={
           variant === 'create'
-            ? 'flex items-center gap-1 p-3 border-b bg-gray-50 overflow-x-auto'
-            : 'flex items-center gap-1 p-3 border-b bg-gray-50 rounded-t-lg overflow-x-auto'
+            ? 'flex items-center gap-1 overflow-x-auto border-b bg-gray-50 p-3'
+            : 'flex items-center gap-1 overflow-x-auto rounded-t-lg border-b bg-gray-50 p-3'
         }
       >
-        {/* Basic Formatting */}
         <Button
           variant="ghost"
           size="sm"
           type="button"
-          onClick={handleBold}
+          onClick={() => editor.chain().focus().toggleBold().run()}
           className={`h-8 w-8 p-0 ${editor.isActive('bold') ? 'bg-gray-200' : ''}`}
           title="Bold"
         >
@@ -203,7 +202,7 @@ export default function CustomTipTapEditor({
           variant="ghost"
           size="sm"
           type="button"
-          onClick={handleItalic}
+          onClick={() => editor.chain().focus().toggleItalic().run()}
           className={`h-8 w-8 p-0 ${editor.isActive('italic') ? 'bg-gray-200' : ''}`}
           title="Italic"
         >
@@ -213,7 +212,7 @@ export default function CustomTipTapEditor({
           variant="ghost"
           size="sm"
           type="button"
-          onClick={handleUnderline}
+          onClick={() => editor.chain().focus().toggleUnderline().run()}
           className={`h-8 w-8 p-0 ${editor.isActive('underline') ? 'bg-gray-200' : ''}`}
           title="Underline"
         >
@@ -223,7 +222,7 @@ export default function CustomTipTapEditor({
           variant="ghost"
           size="sm"
           type="button"
-          onClick={handleStrike}
+          onClick={() => editor.chain().focus().toggleStrike().run()}
           className={`h-8 w-8 p-0 ${editor.isActive('strike') ? 'bg-gray-200' : ''}`}
           title="Strikethrough"
         >
@@ -233,21 +232,20 @@ export default function CustomTipTapEditor({
           variant="ghost"
           size="sm"
           type="button"
-          onClick={handleCode}
+          onClick={() => editor.chain().focus().toggleCode().run()}
           className={`h-8 w-8 p-0 ${editor.isActive('code') ? 'bg-gray-200' : ''}`}
           title="Inline Code"
         >
           <CodeIcon className="h-4 w-4" />
         </Button>
-
-        <Separator orientation="vertical" className="h-4 mx-1" />
-
-        {/* Headings */}
+        <Separator orientation="vertical" className="mx-1 h-4" />
         <Button
           variant="ghost"
           size="sm"
           type="button"
-          onClick={handleH1}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 1 }).run()
+          }
           className={`h-8 w-8 p-0 ${editor.isActive('heading', { level: 1 }) ? 'bg-gray-200' : ''}`}
           title="Heading 1"
         >
@@ -257,7 +255,9 @@ export default function CustomTipTapEditor({
           variant="ghost"
           size="sm"
           type="button"
-          onClick={handleH2}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 2 }).run()
+          }
           className={`h-8 w-8 p-0 ${editor.isActive('heading', { level: 2 }) ? 'bg-gray-200' : ''}`}
           title="Heading 2"
         >
@@ -267,21 +267,20 @@ export default function CustomTipTapEditor({
           variant="ghost"
           size="sm"
           type="button"
-          onClick={handleH3}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 3 }).run()
+          }
           className={`h-8 w-8 p-0 ${editor.isActive('heading', { level: 3 }) ? 'bg-gray-200' : ''}`}
           title="Heading 3"
         >
           <Heading3 className="h-4 w-4" />
         </Button>
-
-        <Separator orientation="vertical" className="h-4 mx-1" />
-
-        {/* Text Alignment */}
+        <Separator orientation="vertical" className="mx-1 h-4" />
         <Button
           variant="ghost"
           size="sm"
           type="button"
-          onClick={handleAlignLeft}
+          onClick={() => editor.chain().focus().setTextAlign('left').run()}
           className={`h-8 w-8 p-0 ${editor.isActive({ textAlign: 'left' }) ? 'bg-gray-200' : ''}`}
           title="Align Left"
         >
@@ -291,7 +290,7 @@ export default function CustomTipTapEditor({
           variant="ghost"
           size="sm"
           type="button"
-          onClick={handleAlignCenter}
+          onClick={() => editor.chain().focus().setTextAlign('center').run()}
           className={`h-8 w-8 p-0 ${editor.isActive({ textAlign: 'center' }) ? 'bg-gray-200' : ''}`}
           title="Align Center"
         >
@@ -301,21 +300,18 @@ export default function CustomTipTapEditor({
           variant="ghost"
           size="sm"
           type="button"
-          onClick={handleAlignRight}
+          onClick={() => editor.chain().focus().setTextAlign('right').run()}
           className={`h-8 w-8 p-0 ${editor.isActive({ textAlign: 'right' }) ? 'bg-gray-200' : ''}`}
           title="Align Right"
         >
           <AlignRight className="h-4 w-4" />
         </Button>
-
-        <Separator orientation="vertical" className="h-4 mx-1" />
-
-        {/* Lists and Quote */}
+        <Separator orientation="vertical" className="mx-1 h-4" />
         <Button
           variant="ghost"
           size="sm"
           type="button"
-          onClick={handleBulletList}
+          onClick={() => editor.chain().focus().toggleBulletList().run()}
           className={`h-8 w-8 p-0 ${editor.isActive('bulletList') ? 'bg-gray-200' : ''}`}
           title="Bullet List"
         >
@@ -325,7 +321,7 @@ export default function CustomTipTapEditor({
           variant="ghost"
           size="sm"
           type="button"
-          onClick={handleOrderedList}
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
           className={`h-8 w-8 p-0 ${editor.isActive('orderedList') ? 'bg-gray-200' : ''}`}
           title="Numbered List"
         >
@@ -335,16 +331,13 @@ export default function CustomTipTapEditor({
           variant="ghost"
           size="sm"
           type="button"
-          onClick={handleBlockquote}
+          onClick={() => editor.chain().focus().toggleBlockquote().run()}
           className={`h-8 w-8 p-0 ${editor.isActive('blockquote') ? 'bg-gray-200' : ''}`}
           title="Quote"
         >
           <Quote className="h-4 w-4" />
         </Button>
-
-        <Separator orientation="vertical" className="h-4 mx-1" />
-
-        {/* Link and Image */}
+        <Separator orientation="vertical" className="mx-1 h-4" />
         <Button
           variant="ghost"
           size="sm"
@@ -359,18 +352,27 @@ export default function CustomTipTapEditor({
           variant="ghost"
           size="sm"
           type="button"
-          onClick={handleImage}
+          onClick={handleImageUploadClick}
           className="h-8 w-8 p-0"
           title="Add Image"
         >
           <ImageIcon className="h-4 w-4" />
         </Button>
+        {/* Hidden file input */}
+        <input
+          type="file"
+          ref={imageInputRef}
+          onChange={handleFileSelectAndUpload}
+          className="hidden"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+        />
       </div>
 
-      {/* Content Area - Same styling as original */}
       <EditorContent
         editor={editor}
-        className={variant === 'create' ? 'flex-1' : 'min-h-[400px]'}
+        className={
+          variant === 'create' ? 'flex-1 overflow-y-auto' : 'min-h-[400px]'
+        }
       />
     </div>
   );

@@ -6,12 +6,14 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { FileText, Tag, LogOut } from 'lucide-react';
 import LogoutConfirmationModal from '../modals/LogoutConfirmationModal';
+import { useAuth } from '@/contexts/AuthContext'; // <-- Impor hook
 
 interface SidebarProps {
   isMobile?: boolean;
 }
 
 export default function Sidebar({ isMobile = false }: SidebarProps) {
+  const { logout } = useAuth(); // <-- Gunakan hook hanya untuk fungsi logout
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const pathname = usePathname();
 
@@ -49,16 +51,16 @@ export default function Sidebar({ isMobile = false }: SidebarProps) {
   return (
     <>
       <div className={sidebarClasses}>
-        <div className="flex flex-col h-full">
+        <div className="flex h-full flex-col">
           {/* Header */}
-          <div className="flex items-center justify-center p-6 border-b border-blue-500">
+          <div className="flex items-center justify-center border-b border-blue-500 p-6">
             <Image
               src="/Logo.svg"
               alt="Logo"
               width={134}
               height={24}
               priority
-              className="h-6 w-auto filter brightness-0 invert"
+              className="h-6 w-auto brightness-0 invert filter"
             />
           </div>
 
@@ -74,25 +76,25 @@ export default function Sidebar({ isMobile = false }: SidebarProps) {
                     {item.key === 'logout' ? (
                       <button
                         onClick={handleLogoutClick}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left cursor-pointer ${
+                        className={`flex w-full cursor-pointer items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors ${
                           isActive
                             ? 'bg-white text-blue-600'
                             : 'text-white hover:bg-blue-500 hover:text-white'
                         }`}
                       >
-                        <Icon className="w-5 h-5" />
+                        <Icon className="h-5 w-5" />
                         <span className="font-medium">{item.label}</span>
                       </button>
                     ) : (
                       <Link
                         href={item.href}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                        className={`flex items-center gap-3 rounded-lg px-4 py-3 transition-colors ${
                           isActive
                             ? 'bg-white text-blue-600'
                             : 'text-white hover:bg-blue-500 hover:text-white'
                         }`}
                       >
-                        <Icon className="w-5 h-5" />
+                        <Icon className="h-5 w-5" />
                         <span className="font-medium">{item.label}</span>
                       </Link>
                     )}
@@ -107,6 +109,7 @@ export default function Sidebar({ isMobile = false }: SidebarProps) {
       <LogoutConfirmationModal
         isOpen={showLogoutModal}
         onClose={() => setShowLogoutModal(false)}
+        onConfirm={logout} // <-- Gunakan fungsi logout dari context
       />
     </>
   );

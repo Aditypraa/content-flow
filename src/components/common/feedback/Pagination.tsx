@@ -39,7 +39,7 @@ export default function Pagination({
 
   return (
     <nav
-      className={`self-stretch px-3 lg:px-4 py-4 lg:py-6 bg-gray-50 border-b border-slate-200 flex justify-center items-center ${className}`}
+      className={`flex items-center justify-center self-stretch border-b border-slate-200 bg-gray-50 px-3 py-4 lg:px-4 lg:py-6 ${className}`}
       role="navigation"
       aria-label="Pagination Navigation"
     >
@@ -52,7 +52,7 @@ export default function Pagination({
           className="gap-1 px-2 lg:px-3"
           aria-label={`Go to previous page, page ${currentPage - 1}`}
         >
-          <ChevronLeft className="w-4 h-4" />
+          <ChevronLeft className="h-4 w-4" />
           <span className="hidden sm:inline">Previous</span>
         </Button>
 
@@ -63,17 +63,17 @@ export default function Pagination({
               variant="outline"
               size="sm"
               onClick={() => handlePageClick(1)}
-              className="w-8 h-8 lg:w-10 lg:h-10 p-0 text-sm"
+              className="h-8 w-8 p-0 text-sm lg:h-10 lg:w-10"
               aria-label="Go to page 1"
             >
               1
             </Button>
             {showEllipsis && currentPage > 4 && (
               <div
-                className="flex items-center justify-center w-8 h-8 lg:w-10 lg:h-10"
+                className="flex h-8 w-8 items-center justify-center lg:h-10 lg:w-10"
                 aria-hidden="true"
               >
-                <MoreHorizontal className="w-3 h-3 lg:w-4 lg:h-4 text-slate-400" />
+                <MoreHorizontal className="h-3 w-3 text-slate-400 lg:h-4 lg:w-4" />
               </div>
             )}
           </>
@@ -92,7 +92,7 @@ export default function Pagination({
               variant={isCurrentPage ? 'default' : 'outline'}
               size="sm"
               onClick={() => handlePageClick(page)}
-              className="w-8 h-8 lg:w-10 lg:h-10 p-0 text-sm"
+              className="h-8 w-8 p-0 text-sm lg:h-10 lg:w-10"
               aria-label={`${isCurrentPage ? 'Current page, ' : ''}Go to page ${page}`}
               aria-current={isCurrentPage ? 'page' : undefined}
             >
@@ -106,17 +106,17 @@ export default function Pagination({
           <>
             {showEllipsis && currentPage < totalPages - 3 && (
               <div
-                className="flex items-center justify-center w-8 h-8 lg:w-10 lg:h-10"
+                className="flex h-8 w-8 items-center justify-center lg:h-10 lg:w-10"
                 aria-hidden="true"
               >
-                <MoreHorizontal className="w-3 h-3 lg:w-4 lg:h-4 text-slate-400" />
+                <MoreHorizontal className="h-3 w-3 text-slate-400 lg:h-4 lg:w-4" />
               </div>
             )}
             <Button
               variant="outline"
               size="sm"
               onClick={() => handlePageClick(totalPages)}
-              className="w-8 h-8 lg:w-10 lg:h-10 p-0 text-sm"
+              className="h-8 w-8 p-0 text-sm lg:h-10 lg:w-10"
               aria-label={`Go to page ${totalPages}`}
             >
               {totalPages}
@@ -133,7 +133,7 @@ export default function Pagination({
           aria-label={`Go to next page, page ${currentPage + 1}`}
         >
           <span className="hidden sm:inline">Next</span>
-          <ChevronRight className="w-4 h-4" />
+          <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
     </nav>

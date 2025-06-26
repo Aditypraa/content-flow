@@ -16,16 +16,16 @@ import {
 } from '@/components/ui/form';
 import { Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
-import AuthLayout from '@/components/layouts/AuthLayout';
-
-const loginSchema = z.object({
-  username: z.string().min(1, 'Username is required'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-});
+import axiosInstance from '@/lib/api/axios';
+import Cookies from 'js-cookie';
+import { useRouter } from 'next/navigation';
+import { loginSchema } from '@/lib/validation/auth';
+import Link from 'next/link';
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 const LoginPage = () => {
+  const router = useRouter();
   const [showPassword, setShowPassword] = React.useState(false);
 
   const form = useForm<LoginFormValues>({
@@ -36,28 +36,48 @@ const LoginPage = () => {
     },
   });
 
-  const onSubmit = (data: LoginFormValues) => {
+  const onSubmit = async (data: z.infer<typeof loginSchema>) => {
     try {
-      // Simulate API call
-      console.log('Login data:', data);
-      toast.success('Login successful!');
-      // Here you would typically redirect or handle login logic
-    } catch (err) {
+      // Langkah 1: Kirim data login ke API
+      const response = await axiosInstance.post('/auth/login', data);
+
+      // Langkah 2: Ekstrak token dan role langsung dari response.data
+      const { token, role } = response.data;
+
+      // Langkah 3: Pastikan token dan role ada
+      if (token && role) {
+        toast.success('Login berhasil!');
+
+        // Simpan ke cookies
+        Cookies.set('token', token, { path: '/' });
+        Cookies.set('user_role', role, { path: '/' });
+
+        // Arahkan pengguna berdasarkan role
+        if (role === 'Admin') {
+          router.push('/admin/articles');
+        } else {
+          router.push('/user/articles');
+        }
+      } else {
+        // Ini terjadi jika respons API tidak mengandung token atau role
+        toast.error('Respons dari server tidak valid.');
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
       console.error('Login error:', err);
-      toast.error('Login failed. Please try again.');
+      // Tampilkan pesan error dari API jika ada, jika tidak, tampilkan pesan default
+      const errorMessage =
+        err.response?.data?.message || 'Username atau password salah.';
+      toast.error(errorMessage);
     }
   };
 
   return (
-    <AuthLayout
-      footerText="Don't have an account?"
-      footerLinkText="Register"
-      footerLinkHref="/auth/register"
-    >
+    <>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="self-stretch flex flex-col justify-start items-start gap-3"
+          className="flex flex-col items-start justify-start gap-3 self-stretch"
         >
           {/* Username Field */}
           <FormField
@@ -65,14 +85,14 @@ const LoginPage = () => {
             name="username"
             render={({ field }) => (
               <FormItem className="self-stretch">
-                <FormLabel className="text-gray-900 text-sm font-medium font-['Archivo'] leading-tight">
+                <FormLabel className="font-['Archivo'] text-sm leading-tight font-medium text-gray-900">
                   Username
                 </FormLabel>
                 <FormControl>
                   <Input
                     type="text"
                     placeholder="Input username"
-                    className="self-stretch h-10 px-3 py-2 bg-white rounded-md border border-slate-200"
+                    className="h-10 self-stretch rounded-md border border-slate-200 bg-white px-3 py-2"
                     {...field}
                   />
                 </FormControl>
@@ -87,7 +107,7 @@ const LoginPage = () => {
             name="password"
             render={({ field }) => (
               <FormItem className="self-stretch">
-                <FormLabel className="text-gray-900 text-sm font-medium font-['Archivo'] leading-tight">
+                <FormLabel className="font-['Archivo'] text-sm leading-tight font-medium text-gray-900">
                   Password
                 </FormLabel>
                 <FormControl>
@@ -95,7 +115,7 @@ const LoginPage = () => {
                     <Input
                       type={showPassword ? 'text' : 'password'}
                       placeholder="Input password"
-                      className="self-stretch h-10 px-3 py-2 pr-10 bg-white rounded-md border border-slate-200"
+                      className="h-10 self-stretch rounded-md border border-slate-200 bg-white px-3 py-2 pr-10"
                       {...field}
                     />
                     <Button
@@ -103,7 +123,7 @@ const LoginPage = () => {
                       variant="ghost"
                       size="icon"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-0 top-0 h-10 w-10 hover:bg-transparent"
+                      className="absolute top-0 right-0 h-10 w-10 hover:bg-transparent"
                     >
                       {showPassword ? (
                         <EyeOff className="h-4 w-4 text-slate-600 opacity-50" />
@@ -121,16 +141,29 @@ const LoginPage = () => {
           {/* Login Button */}
           <Button
             type="submit"
-            className="self-stretch h-10 px-4 py-2 bg-blue-600 rounded-md inline-flex justify-center items-center gap-1.5 hover:bg-blue-700"
+            className="inline-flex h-10 items-center justify-center gap-1.5 self-stretch rounded-md bg-blue-600 px-4 py-2 hover:bg-blue-700"
             disabled={form.formState.isSubmitting}
           >
-            <span className="text-center justify-center text-slate-50 text-sm font-medium font-['Archivo'] leading-tight">
+            <span className="justify-center text-center font-['Archivo'] text-sm leading-tight font-medium text-slate-50">
               {form.formState.isSubmitting ? 'Logging in...' : 'Login'}
             </span>
           </Button>
         </form>
       </Form>
-    </AuthLayout>
+
+      {/* Footer Links */}
+      <div className="justify-center">
+        <span className="font-['Archivo'] text-sm leading-tight font-normal text-slate-600">
+          Belum punya akun?{' '}
+        </span>
+        <Link
+          href="/auth/register"
+          className="font-['Archivo'] text-sm leading-tight font-normal text-blue-600 underline hover:text-blue-700"
+        >
+          Daftar sekarang
+        </Link>
+      </div>
+    </>
   );
 };
 
