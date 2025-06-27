@@ -3,14 +3,9 @@
 import React from 'react';
 import Image from 'next/image';
 
-interface AuthLayoutProps {
-  children: React.ReactNode;
-  footerText: string;
-  footerLinkText: string;
-  footerLinkHref: string;
-}
-
-export default function AuthLayout({ children }: AuthLayoutProps) {
+export default function AuthLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
       <div className="inline-flex w-[400px] flex-col items-center justify-center gap-6 rounded-xl bg-white px-4 py-10">
