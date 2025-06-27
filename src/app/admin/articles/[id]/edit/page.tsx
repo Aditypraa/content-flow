@@ -1,3 +1,4 @@
+// app/admin/articles/[id]/edit/page.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -5,7 +6,6 @@ import { useRouter, useParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -37,28 +37,26 @@ import { toast } from 'sonner';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
-
 import ThumbnailUpload from '@/components/common/forms/ThumbnailUpload';
 import CustomTipTapEditor from '@/components/common/forms/CustomTipTapEditor';
 import axiosInstance from '@/lib/api/axios';
+import { useAuth } from '@/contexts/AuthContext';
 
-// Type for category
+// --- Definisi Tipe dan Skema ---
 interface Category {
   id: string;
   name: string;
 }
 
-// Constants for validation
-const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+const MAX_FILE_SIZE = 2 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = [
   'image/jpeg',
   'image/jpg',
   'image/png',
   'image/webp',
 ];
-const MIN_CONTENT_WORDS = 50;
+const MIN_CONTENT_WORDS = 10;
 
-// Zod schema validation
 const articleSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters long.'),
   categoryId: z
@@ -92,6 +90,7 @@ export default function ArticleEditPage() {
   const router = useRouter();
   const params = useParams();
   const articleId = params.id as string;
+  const { user } = useAuth(); // Mengambil data pengguna
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [isLoadingArticle, setIsLoadingArticle] = useState(true);
@@ -102,7 +101,6 @@ export default function ArticleEditPage() {
   );
   const [deleteThumbnail, setDeleteThumbnail] = useState(false);
 
-  // Setup react-hook-form
   const form = useForm<ArticleFormValues>({
     resolver: zodResolver(articleSchema),
     defaultValues: {
@@ -114,15 +112,11 @@ export default function ArticleEditPage() {
     mode: 'onChange',
   });
 
-  // Fetch categories and article data on component mount
+  // Fetch data
   useEffect(() => {
-    if (!articleId) {
-      toast.error('Invalid article ID.');
-      router.push('/admin/articles');
-      return;
-    }
-
+    if (!articleId) return;
     const fetchData = async () => {
+      // ... (logika fetch data Anda tetap sama)
       setIsLoadingCategories(true);
       setIsLoadingArticle(true);
 
@@ -174,18 +168,16 @@ export default function ArticleEditPage() {
         setIsLoadingArticle(false);
       }
     };
-
     fetchData();
   }, [articleId, form, router]);
 
   const wordCount =
     form.watch('content')?.trim().split(/\s+/).filter(Boolean).length || 0;
 
-  // Handle form submission
+  // Fungsi submit
   const onSubmit = async (data: ArticleFormValues) => {
     setIsSubmitting(true);
-    setUploadProgress('');
-
+    // ... (Logika onSubmit Anda tetap sama)
     try {
       let imageUrl = existingThumbnail;
 
@@ -244,6 +236,35 @@ export default function ArticleEditPage() {
       setIsSubmitting(false);
       setUploadProgress('');
     }
+  };
+
+  // Fungsi untuk pratinjau
+  const handlePreview = () => {
+    const data = form.getValues();
+    const selectedCategory = categories.find((c) => c.id === data.categoryId);
+
+    let previewImageUrl = existingThumbnail;
+    if (data.thumbnail) {
+      previewImageUrl = URL.createObjectURL(data.thumbnail);
+    } else if (deleteThumbnail) {
+      previewImageUrl = null;
+    }
+
+    const previewData = {
+      title: data.title,
+      content: data.content,
+      imageUrl: previewImageUrl,
+      createdAt: new Date().toISOString(),
+      user: { username: user?.username || 'Admin' },
+      category: {
+        id: data.categoryId,
+        name: selectedCategory?.name || 'Uncategorized',
+      },
+      isPreview: true,
+    };
+
+    localStorage.setItem('articlePreview', JSON.stringify(previewData));
+    window.open(`/admin/articles/preview`, '_blank');
   };
 
   const handleDeleteThumbnail = () => {
@@ -361,7 +382,6 @@ export default function ArticleEditPage() {
                             </FormItem>
                           )}
                         />
-
                         <FormField
                           control={form.control}
                           name="title"
@@ -381,7 +401,6 @@ export default function ArticleEditPage() {
                             </FormItem>
                           )}
                         />
-
                         <FormField
                           control={form.control}
                           name="categoryId"
@@ -430,7 +449,6 @@ export default function ArticleEditPage() {
                           )}
                         />
                       </div>
-
                       <FormField
                         control={form.control}
                         name="content"
@@ -451,17 +469,14 @@ export default function ArticleEditPage() {
                           </FormItem>
                         )}
                       />
-
                       <div className="flex items-center justify-end text-xs text-gray-500">
                         <span>{wordCount} Words</span>
                       </div>
-
                       {uploadProgress && (
                         <div className="text-sm font-medium text-blue-600">
                           {uploadProgress}
                         </div>
                       )}
-
                       <div className="mt-4 flex flex-col justify-end gap-2 border-t py-4 sm:flex-row">
                         <Button
                           type="button"
@@ -475,8 +490,8 @@ export default function ArticleEditPage() {
                         <Button
                           type="button"
                           variant="secondary"
+                          onClick={handlePreview}
                           className="w-full bg-slate-200 text-slate-900 sm:w-auto"
-                          disabled
                         >
                           Preview
                         </Button>

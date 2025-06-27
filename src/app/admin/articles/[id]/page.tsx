@@ -1,151 +1,163 @@
-import React from 'react';
+// app/admin/articles/preview/page.tsx
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import ArticleContent from '@/components/layouts/ArticleContentLayout';
+import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 
-export default function PreviewArticle() {
-  // Contoh content yang dihasilkan dari TipTap editor (sama seperti user page)
-  const articleContent = `
-        <p>In the ever-evolving world of digital product design, collaboration between designers and developers has always been a crucial—yet often challenging—part of the process. In April 2025, <strong>Figma introduced Dev Mode</strong>, a powerful new feature aimed at streamlining that collaboration more than ever before.</p>
+// Tipe untuk data pratinjau
+interface PreviewData {
+  title: string;
+  content: string;
+  imageUrl: string | null;
+  createdAt: string;
+  user: { username: string };
+  category: { name: string };
+}
 
-        <h2>🔧 What Is Dev Mode?</h2>
-
-        <p>Dev Mode is a new interface within Figma that provides developer-focused tools and removes unnecessary UI clutter that designers typically use. Instead, developers can view ready-to-implement specs, such as <em>spacing</em>, <u>color values</u>, <code>font styles</code>, and asset exports—without disrupting the design file or asking the design team for clarifications.</p>
-
-        <h2>🤝 Bridging the Gap Between Design & Development</h2>
-
-        <p>Traditionally, handing off designs involved back-and-forth communication, misunderstandings, and occasional delays. With Dev Mode, handoff becomes <strong>real-time and seamless</strong>:</p>
-
-        <ul class="tiptap-bullet-list">
-            <li><strong>Live Design Specs:</strong> Developers can inspect the design without needing additional tools or extensions.</li>
-            <li><strong>Code Snippets:</strong> Automatically generated CSS, iOS (Swift), and Android (XML) code help speed up implementation.</li>
-            <li><strong>Version History Access:</strong> Stay aligned with design updates without asking for a new export every time.</li>
-            <li><strong>Integrated Comments:</strong> Developers can leave feedback directly in the design file.</li>
-        </ul>
-
-        <h2>🚀 Why It Matters</h2>
-
-        <blockquote class="tiptap-blockquote">
-            <p>For design teams working in agile environments, the speed of handoff can make or break a sprint. Figma's Dev Mode turns a typically messy phase into a collaborative, real-time experience that reduces errors, shortens build times, and improves the designer-developer relationship.</p>
-        </blockquote>
-
-        <h3>Key Benefits Include:</h3>
-
-        <ol class="tiptap-ordered-list">
-            <li>Reduced communication overhead</li>
-            <li>Faster development cycles</li>
-            <li>Higher fidelity implementations</li>
-            <li>Better designer-developer relationships</li>
-        </ol>
-
-        <p style="text-align: center"><em>The future of design-to-development handoff is here, and it's more seamless than ever.</em></p>
-
-        <h2>🧠 Final Thoughts</h2>
-
-        <p>Whether you're a solo designer working with freelance developers or part of a large product team, Figma's Dev Mode introduces a <strong>smoother, smarter way to collaborate</strong>. It's not just a feature—it's a shift in how digital products are built.</p>
-
-        <p>💬 <s>What do you think of Dev Mode?</s> Have you tried it yet? <a href="https://figma.com">Share your experience</a> in the comments!</p>
-    `;
-  return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="flex items-center justify-between border-b border-slate-200 px-4 py-6 sm:px-8 lg:px-[60px] lg:py-8">
-        <Image
-          src="/Logo.svg"
-          alt="Logo"
-          width={134}
-          height={24}
-          priority
-          className="h-5 w-auto lg:h-6"
-        />
-        <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-200 lg:h-8 lg:w-8">
-            <span className="text-sm font-medium text-blue-900 lg:text-base">
-              J
-            </span>
-          </div>
-          <Link
-            href="/admin/profile"
-            className="text-sm font-medium text-slate-900 underline lg:text-base"
-          >
-            James Dean
-          </Link>
+// Komponen Skeleton
+const ArticlePreviewSkeleton = () => (
+  <>
+    <div className="border-b border-slate-200 bg-white px-4 py-5 lg:px-6">
+      <Skeleton className="mb-3 h-7 w-48" />
+      <Skeleton className="h-4 w-64" />
+    </div>
+    <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+      <div className="mx-auto max-w-4xl">
+        <div className="space-y-4 text-center">
+          <Skeleton className="mx-auto h-6 w-24 rounded-full" />
+          <Skeleton className="mx-auto h-10 w-3/4" />
         </div>
-      </header>
+        <Skeleton className="mt-8 h-96 w-full rounded-xl" />
+      </div>
+    </main>
+  </>
+);
 
-      {/* Article Content */}
-      <main className="px-4 py-6 sm:px-8 lg:px-20 lg:py-10 xl:px-40">
-        <article className="mx-auto max-w-4xl">
-          {/* Article Header */}
+export default function PreviewArticlePage() {
+  const router = useRouter();
+  const [article, setArticle] = useState<PreviewData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const previewDataString = localStorage.getItem('articlePreview');
+    if (previewDataString) {
+      try {
+        const data = JSON.parse(previewDataString);
+        setArticle(data);
+      } catch {
+        toast.error('Gagal memuat data pratinjau.');
+      }
+    }
+    setIsLoading(false);
+
+    // Hapus data dari localStorage saat komponen dilepas (unmount)
+    return () => {
+      localStorage.removeItem('articlePreview');
+    };
+  }, []);
+
+  const breadcrumbs = [
+    { label: 'Articles', href: '/admin/articles' },
+    { label: 'Preview' },
+  ];
+
+  if (isLoading) {
+    return <ArticlePreviewSkeleton />;
+  }
+
+  if (!article) {
+    return (
+      <div className="p-8 text-center">
+        <h2 className="text-xl font-semibold">
+          Data Pratinjau Tidak Ditemukan
+        </h2>
+        <p className="text-gray-500">Silakan kembali dan coba lagi.</p>
+        <Button onClick={() => router.back()} className="mt-4">
+          Kembali
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {/* Header Halaman */}
+      <div className="border-b border-slate-200 bg-white px-4 py-5 lg:px-6">
+        <h1 className="mb-3 text-xl leading-7 font-semibold text-slate-900">
+          Article Preview
+        </h1>
+        <Breadcrumb>
+          <BreadcrumbList>
+            {breadcrumbs.map((crumb, index) => (
+              <React.Fragment key={index}>
+                {index > 0 && <BreadcrumbSeparator />}
+                <BreadcrumbItem>
+                  {crumb.href ? (
+                    <BreadcrumbLink href={crumb.href}>
+                      {crumb.label}
+                    </BreadcrumbLink>
+                  ) : (
+                    <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                  )}
+                </BreadcrumbItem>
+              </React.Fragment>
+            ))}
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
+
+      {/* Konten Utama Halaman */}
+      <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <article className="mx-auto max-w-4xl rounded-xl border bg-white p-4 sm:p-8">
           <div className="mb-6 text-center lg:mb-10">
             <div className="mb-3 flex flex-col items-center justify-center gap-1 text-sm text-slate-600 sm:flex-row lg:mb-4">
-              <span>February 4, 2025</span>
+              <span>
+                {new Date(article.createdAt).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </span>
               <span className="hidden sm:inline">•</span>
-              <span>Created by Admin</span>
+              <span>Created by {article.user.username}</span>
             </div>
             <h1 className="mb-3 px-2 text-xl leading-tight font-semibold text-slate-900 sm:text-2xl lg:mb-4 lg:text-3xl lg:leading-9">
-              Figma&apos;s New Dev Mode: A Game-Changer for Designers &
-              Developers
+              {article.title}
             </h1>
-            <Badge variant="outline">Technology</Badge>
+            <Badge variant="outline">{article.category.name}</Badge>
           </div>
-
-          {/* Featured Image */}
           <div className="mb-6 lg:mb-10">
             <Image
-              src="https://placehold.co/1120x480"
-              alt="Figma Dev Mode article featured image"
+              src={
+                article.imageUrl ||
+                'https://placehold.co/1120x480?text=No+Image'
+              }
+              alt={article.title}
               width={1120}
               height={480}
               className="h-[240px] w-full rounded-lg object-cover sm:h-[320px] lg:h-[480px] lg:rounded-xl"
             />
           </div>
-
-          {/* Article Body */}
           <ArticleContent
-            content={articleContent}
+            content={article.content}
             className="prose prose-slate max-w-none text-sm sm:text-base"
           />
         </article>
       </main>
-
-      {/* Related Articles */}
-      <section className="px-4 pt-6 pb-12 sm:px-8 lg:px-20 lg:pt-10 lg:pb-[100px] xl:px-[180px]">
-        <div className="mx-auto max-w-6xl">
-          <h2 className="mb-4 text-lg font-bold text-slate-900 lg:mb-6 lg:text-xl">
-            Other articles
-          </h2>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-10">
-            {[1, 2, 3].map((i) => (
-              <Card key={i} className="overflow-hidden">
-                <Image
-                  src={`https://placehold.co/333x240?text=Article+${i}`}
-                  alt={`Related article ${i}`}
-                  width={333}
-                  height={240}
-                  className="h-48 w-full object-cover lg:h-60"
-                />
-                <CardContent className="p-3 lg:p-4">
-                  <div className="mb-2 flex items-center gap-2 text-xs text-slate-500">
-                    <span>February {i}, 2025</span>
-                    <span>•</span>
-                    <span>5 min read</span>
-                  </div>
-                  <h3 className="mb-2 text-sm font-semibold text-slate-900">
-                    Related Article Title {i}
-                  </h3>
-                  <p className="line-clamp-2 text-xs text-slate-600">
-                    This is a brief description of the related article that
-                    provides context about its content.
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-    </div>
+    </>
   );
 }

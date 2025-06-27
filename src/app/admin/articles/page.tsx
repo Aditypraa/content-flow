@@ -335,7 +335,7 @@ export default function ArticleAdminPage() {
                       <TableCell data-label="Action" className="cell-actions">
                         <div className="flex gap-2 lg:justify-center">
                           <Link
-                            href={`/admin/articles/${article.id}`}
+                            href={`/user/articles/${article.id}`}
                             className="flex-1 lg:flex-none"
                           >
                             <Button
@@ -344,7 +344,7 @@ export default function ArticleAdminPage() {
                               className="h-8 w-full text-xs lg:h-auto lg:border-0 lg:bg-transparent lg:p-1 lg:text-blue-600 lg:underline"
                             >
                               <Eye className="mr-1 h-4 w-4 lg:h-3 lg:w-3" />
-                              <span className="lg:text-xs">Preview</span>
+                              <span className="lg:text-xs">View</span>
                             </Button>
                           </Link>
                           <Link
