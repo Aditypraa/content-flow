@@ -1,6 +1,6 @@
 // src/app/user/layout.tsx
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import UserNavbar from '@/components/common/navigation/UserNavbar';
 import Footer from '@/components/common/navigation/Footer';
 import { AuthProvider } from '@/contexts/AuthContext';
@@ -21,7 +21,11 @@ export default function UserLayout({ children }: UserLayoutProps) {
         </header>
 
         {/* 3. Main content sekarang akan tumbuh untuk mengisi ruang yang tersedia */}
-        <main className="flex-grow">{children}</main>
+        <main className="flex-grow">
+          <Suspense fallback={<div>Loading user content...</div>}>
+            {children}
+          </Suspense>
+        </main>
 
         <Footer />
       </div>

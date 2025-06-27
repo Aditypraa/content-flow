@@ -2,7 +2,7 @@
 
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, Suspense } from 'react';
 import Sidebar from '@/components/common/navigation/Sidebar';
 import NavHeader from '@/components/common/navigation/NavHeader';
 import { AuthProvider } from '@/contexts/AuthContext';
@@ -42,7 +42,11 @@ export default function AdminDashboardLayout({
 
           {/* 2. 'children' (konten halaman) sekarang memiliki scroll sendiri */}
           {/* Ini memastikan header tetap diam saat konten di-scroll */}
-          <div className="flex-1 overflow-y-auto">{children}</div>
+          <div className="flex-1 overflow-y-auto">
+            <Suspense fallback={<div>Loading admin content...</div>}>
+              {children}
+            </Suspense>
+          </div>
         </div>
 
         {/* Sidebar untuk Mobile menggunakan Sheet */}
