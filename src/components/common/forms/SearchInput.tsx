@@ -1,101 +1,115 @@
-import React, { useState } from 'react';
+// src/components/common/forms/SearchInput.tsx
+
+'use client';
+
+import React, { useState, useCallback, forwardRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-interface SearchInputProps {
-  placeholder?: string;
-  value?: string;
-  onChange?: (value: string) => void;
+// Tetap menggunakan React.InputHTMLAttributes untuk mendapatkan semua props standar dari input
+interface SearchInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   onSearch?: (query: string) => void;
   onClear?: () => void;
-  className?: string;
-  disabled?: boolean;
   showClearButton?: boolean;
-  autoFocus?: boolean;
 }
 
-export default function SearchInput({
-  placeholder = 'Search...',
-  value: controlledValue,
-  onChange,
-  onSearch,
-  onClear,
-  className = '',
-  disabled = false,
-  showClearButton = true,
-  autoFocus = false,
-}: SearchInputProps) {
-  const [internalValue, setInternalValue] = useState('');
+const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
+  (
+    {
+      placeholder = 'Search...',
+      value: controlledValue,
+      defaultValue,
+      onChange,
+      onSearch,
+      onClear,
+      className,
+      disabled = false,
+      showClearButton = true,
+      ...props // Sebar sisa props ke komponen Input
+    },
+    ref,
+  ) => {
+    // 1. Logika state yang lebih standar untuk komponen terkontrol vs. tidak terkontrol
+    const [uncontrolledValue, setUncontrolledValue] = useState(
+      defaultValue || '',
+    );
+    const isControlled = controlledValue !== undefined;
+    const value = isControlled ? controlledValue : uncontrolledValue;
 
-  // Use controlled value if provided, otherwise use internal state
-  const value = controlledValue !== undefined ? controlledValue : internalValue;
+    // 2. Menggunakan useCallback untuk stabilitas fungsi dan efisiensi
+    const handleInputChange = useCallback(
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newValue = e.target.value;
+        if (!isControlled) {
+          setUncontrolledValue(newValue);
+        }
+        // Selalu panggil onChange jika ada, memungkinkan parent untuk bereaksi
+        onChange?.(e);
+      },
+      [isControlled, onChange],
+    );
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    if (onChange) {
-      onChange(newValue);
-    } else {
-      setInternalValue(newValue);
-    }
-  };
+    const handleClear = useCallback(() => {
+      if (!isControlled) {
+        setUncontrolledValue('');
+      }
+      // Memanggil onChange dengan nilai kosong untuk memberi tahu parent
+      onChange?.({
+        target: { value: '' },
+      } as React.ChangeEvent<HTMLInputElement>);
+      onClear?.();
+    }, [isControlled, onChange, onClear]);
 
-  const handleSearch = () => {
-    if (onSearch) {
-      onSearch(value);
-    }
-  };
+    const handleKeyDown = useCallback(
+      (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter' && onSearch) {
+          e.preventDefault();
+          onSearch(value as string);
+        }
+        if (e.key === 'Escape') {
+          handleClear();
+        }
+        // Memanggil onKeyDown dari props jika ada
+        props.onKeyDown?.(e);
+      },
+      [onSearch, value, handleClear, props.onKeyDown],
+    );
 
-  const handleClear = () => {
-    if (onChange) {
-      onChange('');
-    } else {
-      setInternalValue('');
-    }
-    if (onClear) {
-      onClear();
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleSearch();
-    }
-    if (e.key === 'Escape') {
-      handleClear();
-    }
-  };
-
-  return (
-    <div className={`relative ${className}`}>
-      <div className="relative">
-        <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
+    return (
+      // 3. Struktur HTML yang disederhanakan dan penggunaan `cn`
+      <div className={cn('relative w-full', className)}>
+        <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 z-10 h-4 w-4 -translate-y-1/2" />
         <Input
+          ref={ref}
           type="search"
           placeholder={placeholder}
           value={value}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           disabled={disabled}
-          autoFocus={autoFocus}
-          className="pr-10 pl-10"
+          className="h-10 pr-10 pl-10" // Padding disesuaikan untuk ikon
           aria-label={placeholder}
+          {...props} // Menyebar sisa props
         />
-        {showClearButton && value && (
+        {showClearButton && value && !disabled && (
           <Button
             type="button"
             variant="ghost"
             size="sm"
             onClick={handleClear}
-            disabled={disabled}
-            className="absolute top-1/2 right-1 h-8 w-8 -translate-y-1/2 transform p-0 hover:bg-gray-100"
+            className="absolute top-1/2 right-1 h-8 w-8 -translate-y-1/2 p-0"
             aria-label="Clear search"
           >
             <X className="h-4 w-4" />
           </Button>
         )}
       </div>
-    </div>
-  );
-}
+    );
+  },
+);
+
+SearchInput.displayName = 'SearchInput';
+
+export default SearchInput;

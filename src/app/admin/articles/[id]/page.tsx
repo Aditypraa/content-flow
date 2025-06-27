@@ -1,14 +1,16 @@
-// app/admin/articles/preview/page.tsx
+// src/app/admin/articles/preview/page.tsx
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { toast } from 'sonner';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import ArticleContent from '@/components/layouts/ArticleContentLayout';
+import ArticleContentLayout from '@/components/layouts/ArticleContentLayout';
 import { Skeleton } from '@/components/ui/skeleton';
-import { toast } from 'sonner';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -17,8 +19,9 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import { ArrowLeft, BookOpen } from 'lucide-react';
 
-// Tipe untuk data pratinjau
+// --- Type Definitions ---
 interface PreviewData {
   title: string;
   content: string;
@@ -28,134 +31,136 @@ interface PreviewData {
   category: { name: string };
 }
 
-// Komponen Skeleton
-const ArticlePreviewSkeleton = () => (
-  <>
-    <div className="border-b border-slate-200 bg-white px-4 py-5 lg:px-6">
-      <Skeleton className="mb-3 h-7 w-48" />
-      <Skeleton className="h-4 w-64" />
-    </div>
-    <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-      <div className="mx-auto max-w-4xl">
-        <div className="space-y-4 text-center">
-          <Skeleton className="mx-auto h-6 w-24 rounded-full" />
-          <Skeleton className="mx-auto h-10 w-3/4" />
-        </div>
-        <Skeleton className="mt-8 h-96 w-full rounded-xl" />
-      </div>
-    </main>
-  </>
+// --- Sub-Components ---
+const PageHeader = () => (
+  <div className="border-b bg-white px-4 py-5 lg:px-6">
+    <h1 className="mb-3 text-xl font-semibold text-slate-900">
+      Article Preview
+    </h1>
+    <Breadcrumb>
+      <BreadcrumbList>
+        <BreadcrumbItem>
+          <BreadcrumbLink href="/admin/articles">Articles</BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbPage>Preview</BreadcrumbPage>
+        </BreadcrumbItem>
+      </BreadcrumbList>
+    </Breadcrumb>
+  </div>
 );
 
-export default function PreviewArticlePage() {
+const ArticleHeader = ({ article }: { article: PreviewData }) => (
+  <div className="space-y-4 text-center">
+    <div className="text-muted-foreground flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm">
+      <Badge variant="outline">
+        {article.category.name || 'Uncategorized'}
+      </Badge>
+      <span>
+        Published on{' '}
+        {new Date(article.createdAt).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })}
+      </span>
+      <span>By {article.user.username}</span>
+    </div>
+    <h1 className="text-3xl leading-tight font-bold text-gray-900 md:text-4xl">
+      {article.title}
+    </h1>
+  </div>
+);
+
+const NotFoundState = () => {
   const router = useRouter();
+  return (
+    <div className="flex min-h-[calc(100vh-100px)] flex-col items-center justify-center text-center">
+      <BookOpen className="text-muted-foreground h-12 w-12" />
+      <h2 className="mt-4 text-2xl font-semibold">Preview Data Not Found</h2>
+      <p className="text-muted-foreground mt-2">
+        Please go back to the editor and try previewing again.
+      </p>
+      <Button onClick={() => router.back()} className="mt-6">
+        <ArrowLeft className="mr-2 h-4 w-4" /> Go Back
+      </Button>
+    </div>
+  );
+};
+
+// --- Skeleton Component ---
+const PreviewSkeleton = () => (
+  <div className="container mx-auto max-w-4xl py-12">
+    <div className="space-y-8">
+      <div className="space-y-4 text-center">
+        <Skeleton className="mx-auto h-6 w-24 rounded-full" />
+        <Skeleton className="mx-auto h-10 w-3/4 rounded" />
+      </div>
+      <Skeleton className="aspect-video w-full rounded-xl" />
+      <div className="space-y-4 pt-4">
+        <Skeleton className="h-5 w-full rounded" />
+        <Skeleton className="h-5 w-full rounded" />
+        <Skeleton className="h-5 w-5/6 rounded" />
+      </div>
+    </div>
+  </div>
+);
+
+// --- Main Page Component ---
+export default function PreviewArticlePage() {
   const [article, setArticle] = useState<PreviewData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const previewDataString = localStorage.getItem('articlePreview');
-    if (previewDataString) {
-      try {
-        const data = JSON.parse(previewDataString);
-        setArticle(data);
-      } catch {
-        toast.error('Gagal memuat data pratinjau.');
+    // 1. Dijalankan hanya di sisi klien
+    if (typeof window !== 'undefined') {
+      const previewDataString = localStorage.getItem('articlePreview');
+      if (previewDataString) {
+        try {
+          const data = JSON.parse(previewDataString);
+          setArticle(data);
+        } catch {
+          toast.error('Failed to load preview data.');
+        }
       }
-    }
-    setIsLoading(false);
+      setIsLoading(false);
 
-    // Hapus data dari localStorage saat komponen dilepas (unmount)
-    return () => {
+      // 2. Data pratinjau hanya untuk sekali lihat, langsung hapus.
       localStorage.removeItem('articlePreview');
-    };
+    }
   }, []);
 
-  const breadcrumbs = [
-    { label: 'Articles', href: '/admin/articles' },
-    { label: 'Preview' },
-  ];
-
   if (isLoading) {
-    return <ArticlePreviewSkeleton />;
+    return <PreviewSkeleton />;
   }
 
   if (!article) {
-    return (
-      <div className="p-8 text-center">
-        <h2 className="text-xl font-semibold">
-          Data Pratinjau Tidak Ditemukan
-        </h2>
-        <p className="text-gray-500">Silakan kembali dan coba lagi.</p>
-        <Button onClick={() => router.back()} className="mt-4">
-          Kembali
-        </Button>
-      </div>
-    );
+    return <NotFoundState />;
   }
 
   return (
     <>
-      {/* Header Halaman */}
-      <div className="border-b border-slate-200 bg-white px-4 py-5 lg:px-6">
-        <h1 className="mb-3 text-xl leading-7 font-semibold text-slate-900">
-          Article Preview
-        </h1>
-        <Breadcrumb>
-          <BreadcrumbList>
-            {breadcrumbs.map((crumb, index) => (
-              <React.Fragment key={index}>
-                {index > 0 && <BreadcrumbSeparator />}
-                <BreadcrumbItem>
-                  {crumb.href ? (
-                    <BreadcrumbLink href={crumb.href}>
-                      {crumb.label}
-                    </BreadcrumbLink>
-                  ) : (
-                    <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
-                  )}
-                </BreadcrumbItem>
-              </React.Fragment>
-            ))}
-          </BreadcrumbList>
-        </Breadcrumb>
-      </div>
+      <PageHeader />
+      <main className="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-6 lg:p-8">
+        <article className="container mx-auto max-w-4xl rounded-xl border bg-white p-6 shadow-sm sm:p-8">
+          <div className="space-y-8">
+            <ArticleHeader article={article} />
 
-      {/* Konten Utama Halaman */}
-      <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-        <article className="mx-auto max-w-4xl rounded-xl border bg-white p-4 sm:p-8">
-          <div className="mb-6 text-center lg:mb-10">
-            <div className="mb-3 flex flex-col items-center justify-center gap-1 text-sm text-slate-600 sm:flex-row lg:mb-4">
-              <span>
-                {new Date(article.createdAt).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </span>
-              <span className="hidden sm:inline">•</span>
-              <span>Created by {article.user.username}</span>
-            </div>
-            <h1 className="mb-3 px-2 text-xl leading-tight font-semibold text-slate-900 sm:text-2xl lg:mb-4 lg:text-3xl lg:leading-9">
-              {article.title}
-            </h1>
-            <Badge variant="outline">{article.category.name}</Badge>
+            {article.imageUrl && (
+              <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-gray-200">
+                <Image
+                  src={article.imageUrl}
+                  alt={article.title}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            )}
+
+            {/* 3. Gunakan ArticleContentLayout yang sudah ada */}
+            <ArticleContentLayout content={article.content} />
           </div>
-          <div className="mb-6 lg:mb-10">
-            <Image
-              src={
-                article.imageUrl ||
-                'https://placehold.co/1120x480?text=No+Image'
-              }
-              alt={article.title}
-              width={1120}
-              height={480}
-              className="h-[240px] w-full rounded-lg object-cover sm:h-[320px] lg:h-[480px] lg:rounded-xl"
-            />
-          </div>
-          <ArticleContent
-            content={article.content}
-            className="prose prose-slate max-w-none text-sm sm:text-base"
-          />
         </article>
       </main>
     </>

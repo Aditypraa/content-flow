@@ -2,15 +2,12 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import Sidebar from '@/components/common/navigation/Sidebar';
 import NavHeader from '@/components/common/navigation/NavHeader';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 
-// Ini adalah Layout Utama untuk semua halaman di bawah /admin.
-// Perhatikan bahwa layout ini tidak lagi menerima props seperti title atau breadcrumbs.
-// Hal tersebut akan menjadi tanggung jawab setiap halaman (page.tsx).
 export default function AdminDashboardLayout({
   children,
 }: {
@@ -18,32 +15,38 @@ export default function AdminDashboardLayout({
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // Gunakan useCallback agar fungsi tidak dibuat ulang pada setiap render
+  const handleMenuClick = useCallback(() => {
+    setIsSidebarOpen(true);
+  }, []);
+
+  const handleSheetOpenChange = useCallback((open: boolean) => {
+    setIsSidebarOpen(open);
+  }, []);
+
   return (
-    // AuthProvider membungkus semua, menyediakan data login.
+    // AuthProvider adalah wrapper yang tepat di level ini
     <AuthProvider>
-      <div className="flex h-screen flex-col overflow-hidden bg-gray-100 lg:flex-row">
+      <div className="bg-muted/40 flex h-screen">
         {/* Sidebar untuk Desktop */}
-        <div className="hidden lg:block">
+        <aside className="hidden lg:block">
           <Sidebar />
+        </aside>
+
+        {/* Wrapper untuk NavHeader dan Konten Utama */}
+        {/* 1. overflow-hidden di sini mencegah double scrollbar */}
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <header className="flex-shrink-0">
+            <NavHeader onMenuClick={handleMenuClick} showMenuButton={true} />
+          </header>
+
+          {/* 2. 'children' (konten halaman) sekarang memiliki scroll sendiri */}
+          {/* Ini memastikan header tetap diam saat konten di-scroll */}
+          <div className="flex-1 overflow-y-auto">{children}</div>
         </div>
 
-        {/* Konten Utama */}
-        <div className="flex h-full flex-1 flex-col">
-          {/* NavHeader tidak lagi memerlukan props spesifik halaman.
-              Ia akan mengambil data pengguna dari AuthContext. */}
-          <NavHeader
-            onMenuClick={() => setIsSidebarOpen(true)}
-            showMenuButton={true}
-          />
-
-          {/* 'children' akan merender halaman yang sedang aktif.
-              Kita TIDAK LAGI meletakkan <main> atau pembungkus lain di sini
-              agar setiap halaman memiliki kebebasan penuh atas layout kontennya sendiri. */}
-          {children}
-        </div>
-
-        {/* Sidebar untuk Mobile */}
-        <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+        {/* Sidebar untuk Mobile menggunakan Sheet */}
+        <Sheet open={isSidebarOpen} onOpenChange={handleSheetOpenChange}>
           <SheetContent side="left" className="w-64 p-0">
             <Sidebar isMobile={true} />
           </SheetContent>

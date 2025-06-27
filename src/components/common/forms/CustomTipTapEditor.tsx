@@ -1,26 +1,22 @@
-// components/common/forms/CustomTipTapEditor.tsx
+// src/components/common/forms/CustomTipTapEditor.tsx
 
 'use client';
 
-import React, { useRef } from 'react';
-import { useEditor, EditorContent } from '@tiptap/react';
+import React, { useRef, useCallback, ElementType } from 'react';
+import { useEditor, EditorContent, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import TextAlign from '@tiptap/extension-text-align';
-import BulletList from '@tiptap/extension-bullet-list';
-import OrderedList from '@tiptap/extension-ordered-list';
-import ListItem from '@tiptap/extension-list-item';
-import Blockquote from '@tiptap/extension-blockquote';
-import Strike from '@tiptap/extension-strike';
-import Code from '@tiptap/extension-code';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import {
   Bold,
   Italic,
   Underline as UnderlineIcon,
+  Strikethrough,
+  Code as CodeIcon,
   Heading1,
   Heading2,
   Heading3,
@@ -29,20 +25,167 @@ import {
   List,
   ListOrdered,
   Quote,
-  Strikethrough,
-  Code as CodeIcon,
   AlignLeft,
   AlignCenter,
   AlignRight,
 } from 'lucide-react';
-import axiosInstance from '@/lib/api/axios'; // Pastikan axiosInstance diimpor
+import axiosInstance from '@/lib/api/axios';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 interface CustomTipTapEditorProps {
   content?: string;
   onChange?: (content: string) => void;
   variant?: 'default' | 'create';
 }
+
+// --- Type Definitions for a more maintainable and type-safe toolbar ---
+interface ToolbarActionProps {
+  handleLink: () => void;
+  handleImageUploadClick: () => void;
+}
+
+type ToolbarButtonConfig = {
+  type: 'button';
+  id: string;
+  title: string;
+  icon: ElementType;
+  action: (editor: Editor, props?: Partial<ToolbarActionProps>) => void;
+  level?: number;
+  value?: string;
+};
+
+type ToolbarSeparatorConfig = {
+  type: 'separator';
+};
+
+type ToolbarItemConfig = ToolbarButtonConfig | ToolbarSeparatorConfig;
+
+// Konfigurasi toolbar tetap di luar untuk efisiensi dan kemudahan pemeliharaan
+const toolbarConfig: ToolbarItemConfig[] = [
+  {
+    type: 'button',
+    id: 'bold',
+    title: 'Bold (Ctrl+B)',
+    icon: Bold,
+    action: (e) => e.chain().focus().toggleBold().run(),
+  },
+  {
+    type: 'button',
+    id: 'italic',
+    title: 'Italic (Ctrl+I)',
+    icon: Italic,
+    action: (e) => e.chain().focus().toggleItalic().run(),
+  },
+  {
+    type: 'button',
+    id: 'underline',
+    title: 'Underline (Ctrl+U)',
+    icon: UnderlineIcon,
+    action: (e) => e.chain().focus().toggleUnderline().run(),
+  },
+  {
+    type: 'button',
+    id: 'strike',
+    title: 'Strikethrough',
+    icon: Strikethrough,
+    action: (e) => e.chain().focus().toggleStrike().run(),
+  },
+  {
+    type: 'button',
+    id: 'code',
+    title: 'Inline Code',
+    icon: CodeIcon,
+    action: (e) => e.chain().focus().toggleCode().run(),
+  },
+  { type: 'separator' },
+  {
+    type: 'button',
+    id: 'heading',
+    level: 1,
+    title: 'Heading 1',
+    icon: Heading1,
+    action: (e) => e.chain().focus().toggleHeading({ level: 1 }).run(),
+  },
+  {
+    type: 'button',
+    id: 'heading',
+    level: 2,
+    title: 'Heading 2',
+    icon: Heading2,
+    action: (e) => e.chain().focus().toggleHeading({ level: 2 }).run(),
+  },
+  {
+    type: 'button',
+    id: 'heading',
+    level: 3,
+    title: 'Heading 3',
+    icon: Heading3,
+    action: (e) => e.chain().focus().toggleHeading({ level: 3 }).run(),
+  },
+  { type: 'separator' },
+  {
+    type: 'button',
+    id: 'textAlign',
+    value: 'left',
+    title: 'Align Left',
+    icon: AlignLeft,
+    action: (e) => e.chain().focus().setTextAlign('left').run(),
+  },
+  {
+    type: 'button',
+    id: 'textAlign',
+    value: 'center',
+    title: 'Align Center',
+    icon: AlignCenter,
+    action: (e) => e.chain().focus().setTextAlign('center').run(),
+  },
+  {
+    type: 'button',
+    id: 'textAlign',
+    value: 'right',
+    title: 'Align Right',
+    icon: AlignRight,
+    action: (e) => e.chain().focus().setTextAlign('right').run(),
+  },
+  { type: 'separator' },
+  {
+    type: 'button',
+    id: 'bulletList',
+    title: 'Bullet List',
+    icon: List,
+    action: (e) => e.chain().focus().toggleBulletList().run(),
+  },
+  {
+    type: 'button',
+    id: 'orderedList',
+    title: 'Ordered List',
+    icon: ListOrdered,
+    action: (e) => e.chain().focus().toggleOrderedList().run(),
+  },
+  {
+    type: 'button',
+    id: 'blockquote',
+    title: 'Quote',
+    icon: Quote,
+    action: (e) => e.chain().focus().toggleBlockquote().run(),
+  },
+  { type: 'separator' },
+  {
+    type: 'button',
+    id: 'link',
+    title: 'Add Link',
+    icon: LinkIcon,
+    action: (editor, props) => props?.handleLink?.(),
+  },
+  {
+    type: 'button',
+    id: 'image',
+    title: 'Add Image',
+    icon: ImageIcon,
+    action: (editor, props) => props?.handleImageUploadClick?.(),
+  },
+];
 
 export default function CustomTipTapEditor({
   content = '',
@@ -53,47 +196,11 @@ export default function CustomTipTapEditor({
 
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({
-        bulletList: false,
-        orderedList: false,
-        listItem: false,
-        blockquote: false,
-        strike: false,
-        code: false,
-      }),
+      StarterKit,
       Underline,
-      Link.configure({
-        openOnClick: false,
-        autolink: true,
-      }),
-      Image.configure({
-        inline: false, // Gambar sebagai block-level element
-      }),
-      TextAlign.configure({
-        types: ['heading', 'paragraph'],
-      }),
-      BulletList.configure({
-        HTMLAttributes: {
-          class: 'tiptap-bullet-list',
-        },
-      }),
-      OrderedList.configure({
-        HTMLAttributes: {
-          class: 'tiptap-ordered-list',
-        },
-      }),
-      ListItem,
-      Blockquote.configure({
-        HTMLAttributes: {
-          class: 'tiptap-blockquote',
-        },
-      }),
-      Strike,
-      Code.configure({
-        HTMLAttributes: {
-          class: 'tiptap-code',
-        },
-      }),
+      Link.configure({ openOnClick: false, autolink: true }),
+      Image.configure({ inline: false }),
+      TextAlign.configure({ types: ['heading', 'paragraph'] }),
     ],
     content,
     onUpdate: ({ editor }) => {
@@ -101,278 +208,152 @@ export default function CustomTipTapEditor({
     },
     editorProps: {
       attributes: {
-        class:
+        class: cn(
+          'prose prose-sm max-w-none focus:outline-none p-4',
           variant === 'create'
-            ? 'w-full h-full resize-none border-none bg-transparent text-slate-500 text-sm placeholder:text-slate-500 p-3 lg:p-4 prose prose-sm max-w-none focus:outline-none'
-            : 'min-h-[400px] border-0 resize-none rounded-none rounded-b-lg focus-visible:ring-0 p-4 prose prose-sm max-w-none focus:outline-none',
+            ? 'flex-1 w-full h-full resize-none border-none bg-transparent text-slate-500 placeholder:text-slate-500'
+            : 'min-h-[400px] border-0 resize-none rounded-b-lg',
+        ),
       },
     },
   });
 
-  if (!editor) {
-    return null;
-  }
-
-  // Fungsi untuk upload gambar ke server
-  const uploadImageToServer = async (file: File): Promise<string | null> => {
-    const formData = new FormData();
-    formData.append('image', file); // 'image' adalah key yang diharapkan backend
-
-    try {
-      // KUNCI PERBAIKAN: Endpoint disesuaikan dengan dokumentasi Anda
-      const response = await axiosInstance.post('/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-
-      // Sesuai dokumentasi, response berisi { "imageUrl": "..." }
-      if (response.data && response.data.imageUrl) {
-        return response.data.imageUrl;
+  const uploadImageToServer = useCallback(
+    async (file: File): Promise<string | null> => {
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error('Image size cannot exceed 2MB.');
+        return null;
       }
-      toast.error('Invalid response from image upload server.');
-      return null;
-    } catch (error) {
-      console.error('Image upload failed:', error);
-      toast.error('Image upload failed. Please try again.');
-      return null;
-    }
-  };
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+        toast.error('Only JPG, PNG, and WebP formats are supported.');
+        return null;
+      }
 
-  // --- Toolbar Handlers ---
+      const formData = new FormData();
+      formData.append('image', file);
 
-  const handleLink = () => {
+      toast.info('Uploading image...');
+      try {
+        const response = await axiosInstance.post('/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        if (response.data?.imageUrl) {
+          toast.success('Image uploaded successfully!');
+          return response.data.imageUrl;
+        }
+        toast.error('Invalid response from image server.');
+        return null;
+      } catch (error) {
+        console.error('Image upload failed:', error);
+        toast.error('Image upload failed. Please try again.');
+        return null;
+      }
+    },
+    [],
+  );
+
+  const handleFileSelectAndUpload = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (file && editor) {
+        const imageUrl = await uploadImageToServer(file);
+        if (imageUrl) {
+          editor.chain().focus().setImage({ src: imageUrl }).run();
+        }
+      }
+      if (event.target) {
+        event.target.value = '';
+      }
+    },
+    [editor, uploadImageToServer],
+  );
+
+  const handleLink = useCallback(() => {
+    if (!editor) return;
     const previousUrl = editor.getAttributes('link').href;
-    const url = window.prompt('Enter URL:', previousUrl);
+    const url = window.prompt('URL', previousUrl);
 
-    if (url === null) {
-      return;
-    }
+    if (url === null) return;
     if (url === '') {
       editor.chain().focus().extendMarkRange('link').unsetLink().run();
       return;
     }
     editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
-  };
+  }, [editor]);
 
-  const handleImageUploadClick = () => {
-    imageInputRef.current?.click();
-  };
-
-  const handleFileSelectAndUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = event.target.files?.[0];
-    if (file && editor) {
-      toast.info('Uploading image...');
-      const imageUrl = await uploadImageToServer(file);
-      if (imageUrl) {
-        editor.chain().focus().setImage({ src: imageUrl }).run();
-        toast.success('Image uploaded successfully!');
-      }
-    }
-    if (event.target) {
-      event.target.value = '';
-    }
-  };
+  if (!editor) {
+    return null;
+  }
 
   return (
     <div
-      className={
-        variant === 'create' ? 'flex h-full flex-col' : 'rounded-lg border'
-      }
+      className={cn(
+        'flex flex-col',
+        variant === 'default' && 'rounded-lg border',
+      )}
     >
-      {/* Editor Toolbar */}
       <div
-        className={
-          variant === 'create'
-            ? 'flex items-center gap-1 overflow-x-auto border-b bg-gray-50 p-3'
-            : 'flex items-center gap-1 overflow-x-auto rounded-t-lg border-b bg-gray-50 p-3'
-        }
+        role="toolbar"
+        aria-label="Text formatting"
+        className={cn(
+          'flex flex-wrap items-center gap-1 border-b bg-gray-50 p-2',
+          variant === 'default' ? 'rounded-t-lg' : '',
+        )}
       >
-        <Button
-          variant="ghost"
-          size="sm"
-          type="button"
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className={`h-8 w-8 p-0 ${editor.isActive('bold') ? 'bg-gray-200' : ''}`}
-          title="Bold"
-        >
-          <Bold className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          type="button"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={`h-8 w-8 p-0 ${editor.isActive('italic') ? 'bg-gray-200' : ''}`}
-          title="Italic"
-        >
-          <Italic className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          type="button"
-          onClick={() => editor.chain().focus().toggleUnderline().run()}
-          className={`h-8 w-8 p-0 ${editor.isActive('underline') ? 'bg-gray-200' : ''}`}
-          title="Underline"
-        >
-          <UnderlineIcon className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          type="button"
-          onClick={() => editor.chain().focus().toggleStrike().run()}
-          className={`h-8 w-8 p-0 ${editor.isActive('strike') ? 'bg-gray-200' : ''}`}
-          title="Strikethrough"
-        >
-          <Strikethrough className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          type="button"
-          onClick={() => editor.chain().focus().toggleCode().run()}
-          className={`h-8 w-8 p-0 ${editor.isActive('code') ? 'bg-gray-200' : ''}`}
-          title="Inline Code"
-        >
-          <CodeIcon className="h-4 w-4" />
-        </Button>
-        <Separator orientation="vertical" className="mx-1 h-4" />
-        <Button
-          variant="ghost"
-          size="sm"
-          type="button"
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 1 }).run()
+        {toolbarConfig.map((item, index) => {
+          if (item.type === 'separator') {
+            return (
+              <Separator
+                key={`sep-${index}`}
+                orientation="vertical"
+                className="mx-1 h-5"
+              />
+            );
           }
-          className={`h-8 w-8 p-0 ${editor.isActive('heading', { level: 1 }) ? 'bg-gray-200' : ''}`}
-          title="Heading 1"
-        >
-          <Heading1 className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          type="button"
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 2 }).run()
-          }
-          className={`h-8 w-8 p-0 ${editor.isActive('heading', { level: 2 }) ? 'bg-gray-200' : ''}`}
-          title="Heading 2"
-        >
-          <Heading2 className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          type="button"
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 3 }).run()
-          }
-          className={`h-8 w-8 p-0 ${editor.isActive('heading', { level: 3 }) ? 'bg-gray-200' : ''}`}
-          title="Heading 3"
-        >
-          <Heading3 className="h-4 w-4" />
-        </Button>
-        <Separator orientation="vertical" className="mx-1 h-4" />
-        <Button
-          variant="ghost"
-          size="sm"
-          type="button"
-          onClick={() => editor.chain().focus().setTextAlign('left').run()}
-          className={`h-8 w-8 p-0 ${editor.isActive({ textAlign: 'left' }) ? 'bg-gray-200' : ''}`}
-          title="Align Left"
-        >
-          <AlignLeft className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          type="button"
-          onClick={() => editor.chain().focus().setTextAlign('center').run()}
-          className={`h-8 w-8 p-0 ${editor.isActive({ textAlign: 'center' }) ? 'bg-gray-200' : ''}`}
-          title="Align Center"
-        >
-          <AlignCenter className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          type="button"
-          onClick={() => editor.chain().focus().setTextAlign('right').run()}
-          className={`h-8 w-8 p-0 ${editor.isActive({ textAlign: 'right' }) ? 'bg-gray-200' : ''}`}
-          title="Align Right"
-        >
-          <AlignRight className="h-4 w-4" />
-        </Button>
-        <Separator orientation="vertical" className="mx-1 h-4" />
-        <Button
-          variant="ghost"
-          size="sm"
-          type="button"
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={`h-8 w-8 p-0 ${editor.isActive('bulletList') ? 'bg-gray-200' : ''}`}
-          title="Bullet List"
-        >
-          <List className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          type="button"
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={`h-8 w-8 p-0 ${editor.isActive('orderedList') ? 'bg-gray-200' : ''}`}
-          title="Numbered List"
-        >
-          <ListOrdered className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          type="button"
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          className={`h-8 w-8 p-0 ${editor.isActive('blockquote') ? 'bg-gray-200' : ''}`}
-          title="Quote"
-        >
-          <Quote className="h-4 w-4" />
-        </Button>
-        <Separator orientation="vertical" className="mx-1 h-4" />
-        <Button
-          variant="ghost"
-          size="sm"
-          type="button"
-          onClick={handleLink}
-          className={`h-8 w-8 p-0 ${editor.isActive('link') ? 'bg-gray-200' : ''}`}
-          title="Add Link"
-        >
-          <LinkIcon className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          type="button"
-          onClick={handleImageUploadClick}
-          className="h-8 w-8 p-0"
-          title="Add Image"
-        >
-          <ImageIcon className="h-4 w-4" />
-        </Button>
-        {/* Hidden file input */}
-        <input
-          type="file"
-          ref={imageInputRef}
-          onChange={handleFileSelectAndUpload}
-          className="hidden"
-          accept="image/jpeg,image/png,image/webp,image/gif"
-        />
+
+          return (
+            <Button
+              key={`${item.id}-${item.level || item.value || index}`}
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label={item.title}
+              title={item.title}
+              onClick={() =>
+                item.action(editor, {
+                  handleLink,
+                  handleImageUploadClick: () => imageInputRef.current?.click(),
+                })
+              }
+              data-active={
+                item.level
+                  ? editor.isActive(item.id, { level: item.level })
+                  : item.value
+                    ? editor.isActive({ [item.id]: item.value })
+                    : editor.isActive(item.id)
+              }
+              className="h-8 w-8 p-0 data-[active=true]:bg-slate-200"
+            >
+              <item.icon className="h-4 w-4" />
+            </Button>
+          );
+        })}
       </div>
 
       <EditorContent
         editor={editor}
-        className={
-          variant === 'create' ? 'flex-1 overflow-y-auto' : 'min-h-[400px]'
-        }
+        className={cn(
+          'flex-1 overflow-y-auto',
+          variant === 'create' && 'bg-gray-50',
+        )}
+      />
+
+      <input
+        type="file"
+        ref={imageInputRef}
+        onChange={handleFileSelectAndUpload}
+        className="hidden"
+        accept="image/jpeg,image/png,image/webp"
       />
     </div>
   );

@@ -1,45 +1,84 @@
+// src/components/common/feedback/pagination.tsx
+
 'use client';
 
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface PaginationProps {
-  currentPage?: number;
-  totalPages?: number;
-  onPageChange?: (page: number) => void;
-  showEllipsis?: boolean;
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  siblingCount?: number;
   className?: string;
 }
 
+const range = (start: number, end: number) => {
+  const length = end - start + 1;
+  return Array.from({ length }, (_, idx) => idx + start);
+};
+
 export default function Pagination({
-  currentPage = 2,
-  totalPages = 10,
+  currentPage,
+  totalPages,
   onPageChange,
-  showEllipsis = true,
+  siblingCount = 1,
   className = '',
 }: PaginationProps) {
-  const handlePrevious = () => {
-    if (currentPage > 1 && onPageChange) {
+  const paginationRange = useMemo(() => {
+    const totalPageNumbers = siblingCount + 5;
+
+    if (totalPageNumbers >= totalPages) {
+      return range(1, totalPages);
+    }
+
+    const leftSiblingIndex = Math.max(currentPage - siblingCount, 1);
+    const rightSiblingIndex = Math.min(currentPage + siblingCount, totalPages);
+
+    const shouldShowLeftDots = leftSiblingIndex > 2;
+    const shouldShowRightDots = rightSiblingIndex < totalPages - 1;
+
+    if (!shouldShowLeftDots && shouldShowRightDots) {
+      const leftItemCount = 3 + 2 * siblingCount;
+      const leftRange = range(1, leftItemCount);
+      return [...leftRange, '...', totalPages];
+    }
+
+    if (shouldShowLeftDots && !shouldShowRightDots) {
+      const rightItemCount = 3 + 2 * siblingCount;
+      const rightRange = range(totalPages - rightItemCount + 1, totalPages);
+      return [1, '...', ...rightRange];
+    }
+
+    if (shouldShowLeftDots && shouldShowRightDots) {
+      const middleRange = range(leftSiblingIndex, rightSiblingIndex);
+      return [1, '...', ...middleRange, '...', totalPages];
+    }
+
+    return [];
+  }, [totalPages, siblingCount, currentPage]);
+
+  const handlePrevious = useCallback(() => {
+    if (currentPage > 1) {
       onPageChange(currentPage - 1);
     }
-  };
+  }, [currentPage, onPageChange]);
 
-  const handleNext = () => {
-    if (currentPage < totalPages && onPageChange) {
+  const handleNext = useCallback(() => {
+    if (currentPage < totalPages) {
       onPageChange(currentPage + 1);
     }
-  };
+  }, [currentPage, totalPages, onPageChange]);
 
-  const handlePageClick = (page: number) => {
-    if (onPageChange) {
-      onPageChange(page);
-    }
-  };
+  if (totalPages <= 1) {
+    return null;
+  }
 
   return (
     <nav
-      className={`flex items-center justify-center self-stretch border-b border-slate-200 bg-gray-50 px-3 py-4 lg:px-4 lg:py-6 ${className}`}
+      className={cn('flex items-center justify-center self-stretch', className)}
       role="navigation"
       aria-label="Pagination Navigation"
     >
@@ -48,7 +87,7 @@ export default function Pagination({
           variant="ghost"
           size="sm"
           onClick={handlePrevious}
-          disabled={currentPage <= 1}
+          disabled={currentPage === 1}
           className="gap-1 px-2 lg:px-3"
           aria-label={`Go to previous page, page ${currentPage - 1}`}
         >
@@ -56,79 +95,38 @@ export default function Pagination({
           <span className="hidden sm:inline">Previous</span>
         </Button>
 
-        {/* Show first page if not current and not adjacent */}
-        {currentPage > 3 && (
-          <>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handlePageClick(1)}
-              className="h-8 w-8 p-0 text-sm lg:h-10 lg:w-10"
-              aria-label="Go to page 1"
+        {/* Logika render disederhanakan tanpa variabel perantara */}
+        {paginationRange.map((pageNumber, index) =>
+          typeof pageNumber === 'string' ? (
+            <div
+              key={`dots-${index}`}
+              className="flex h-8 w-8 items-center justify-center lg:h-10 lg:w-10"
+              aria-hidden="true"
             >
-              1
-            </Button>
-            {showEllipsis && currentPage > 4 && (
-              <div
-                className="flex h-8 w-8 items-center justify-center lg:h-10 lg:w-10"
-                aria-hidden="true"
-              >
-                <MoreHorizontal className="h-3 w-3 text-slate-400 lg:h-4 lg:w-4" />
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Show pages around current page */}
-        {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
-          const page = Math.max(1, currentPage - 1) + i;
-          if (page > totalPages) return null;
-
-          const isCurrentPage = page === currentPage;
-
-          return (
+              <MoreHorizontal className="h-4 w-4 text-slate-400" />
+            </div>
+          ) : (
             <Button
-              key={page}
-              variant={isCurrentPage ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => handlePageClick(page)}
+              key={pageNumber}
+              variant={pageNumber === currentPage ? 'default' : 'outline'}
+              size="icon"
+              onClick={() => onPageChange(pageNumber)}
               className="h-8 w-8 p-0 text-sm lg:h-10 lg:w-10"
-              aria-label={`${isCurrentPage ? 'Current page, ' : ''}Go to page ${page}`}
-              aria-current={isCurrentPage ? 'page' : undefined}
+              aria-label={`${
+                pageNumber === currentPage ? 'Current page, ' : ''
+              }Go to page ${pageNumber}`}
+              aria-current={pageNumber === currentPage ? 'page' : undefined}
             >
-              {page}
+              {pageNumber}
             </Button>
-          );
-        })}
-
-        {/* Show last page if not current and not adjacent */}
-        {currentPage < totalPages - 2 && (
-          <>
-            {showEllipsis && currentPage < totalPages - 3 && (
-              <div
-                className="flex h-8 w-8 items-center justify-center lg:h-10 lg:w-10"
-                aria-hidden="true"
-              >
-                <MoreHorizontal className="h-3 w-3 text-slate-400 lg:h-4 lg:w-4" />
-              </div>
-            )}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handlePageClick(totalPages)}
-              className="h-8 w-8 p-0 text-sm lg:h-10 lg:w-10"
-              aria-label={`Go to page ${totalPages}`}
-            >
-              {totalPages}
-            </Button>
-          </>
+          ),
         )}
 
         <Button
           variant="ghost"
           size="sm"
           onClick={handleNext}
-          disabled={currentPage >= totalPages}
+          disabled={currentPage === totalPages}
           className="gap-1 px-2 lg:px-3"
           aria-label={`Go to next page, page ${currentPage + 1}`}
         >

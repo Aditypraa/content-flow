@@ -1,9 +1,17 @@
+// src/app/auth/login/page.tsx
+
 'use client';
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import Link from 'next/link';
+
+import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
+import { toast } from 'sonner';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -14,19 +22,22 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Eye, EyeOff } from 'lucide-react';
-import { toast } from 'sonner';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import axiosInstance from '@/lib/api/axios';
-import Cookies from 'js-cookie';
-import { useRouter } from 'next/navigation';
-import { loginSchema } from '@/lib/validation/auth';
-import Link from 'next/link';
+
+// Define the login form schema and type
+const loginSchema = z.object({
+  username: z.string().min(1, 'Username is required'),
+  password: z.string().min(1, 'Password is required'),
+});
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-const LoginPage = () => {
+export default function LoginPage() {
   const router = useRouter();
-  const [showPassword, setShowPassword] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  // 1. State untuk show/hide password dipindahkan ke komponen utama
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -34,101 +45,101 @@ const LoginPage = () => {
       username: '',
       password: '',
     },
+    mode: 'onChange',
   });
 
-  const onSubmit = async (data: z.infer<typeof loginSchema>) => {
-    try {
-      // Langkah 1: Kirim data login ke API
-      const response = await axiosInstance.post('/auth/login', data);
+  const onSubmit = useCallback(
+    async (data: LoginFormValues) => {
+      setIsSubmitting(true);
+      try {
+        const response = await axiosInstance.post('/auth/login', data);
 
-      // Langkah 2: Ekstrak token dan role langsung dari response.data
-      const { token, role } = response.data;
+        const { token, role } = response.data;
 
-      // Langkah 3: Pastikan token dan role ada
-      if (token && role) {
-        toast.success('Login berhasil!');
-
-        // Simpan ke cookies
-        Cookies.set('token', token, { path: '/' });
-        Cookies.set('user_role', role, { path: '/' });
-
-        // Arahkan pengguna berdasarkan role
-        if (role === 'Admin') {
-          router.push('/admin/articles');
-        } else {
-          router.push('/user/articles');
+        if (!token || !role) {
+          toast.error('Invalid response from server.');
+          setIsSubmitting(false);
+          return;
         }
-      } else {
-        // Ini terjadi jika respons API tidak mengandung token atau role
-        toast.error('Respons dari server tidak valid.');
+
+        toast.success('Login successful! Redirecting...');
+
+        Cookies.set('token', token, {
+          path: '/',
+          secure: true,
+          sameSite: 'strict',
+        });
+        Cookies.set('user_role', role, {
+          path: '/',
+          secure: true,
+          sameSite: 'strict',
+        });
+
+        const destination =
+          role === 'Admin' ? '/admin/articles' : '/user/articles';
+        router.push(destination);
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (err: any) {
+        const errorMessage =
+          err.response?.data?.message || 'Invalid username or password.';
+        toast.error(errorMessage);
+        setIsSubmitting(false);
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      console.error('Login error:', err);
-      // Tampilkan pesan error dari API jika ada, jika tidak, tampilkan pesan default
-      const errorMessage =
-        err.response?.data?.message || 'Username atau password salah.';
-      toast.error(errorMessage);
-    }
-  };
+    },
+    [router],
+  );
 
   return (
-    <>
+    <div className="w-full">
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col items-start justify-start gap-3 self-stretch"
+          className="flex flex-col gap-4"
         >
-          {/* Username Field */}
           <FormField
             control={form.control}
             name="username"
             render={({ field }) => (
-              <FormItem className="self-stretch">
-                <FormLabel className="font-['Archivo'] text-sm leading-tight font-medium text-gray-900">
-                  Username
-                </FormLabel>
+              <FormItem>
+                <FormLabel>Username</FormLabel>
                 <FormControl>
-                  <Input
-                    type="text"
-                    placeholder="Input username"
-                    className="h-10 self-stretch rounded-md border border-slate-200 bg-white px-3 py-2"
-                    {...field}
-                  />
+                  <Input placeholder="Enter your username" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          {/* Password Field */}
           <FormField
             control={form.control}
             name="password"
             render={({ field }) => (
-              <FormItem className="self-stretch">
-                <FormLabel className="font-['Archivo'] text-sm leading-tight font-medium text-gray-900">
-                  Password
-                </FormLabel>
+              <FormItem>
+                <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <div className="relative self-stretch">
+                  {/* 2. Logika dan JSX untuk input password dikembalikan ke sini */}
+                  <div className="relative">
                     <Input
                       type={showPassword ? 'text' : 'password'}
                       placeholder="Input password"
-                      className="h-10 self-stretch rounded-md border border-slate-200 bg-white px-3 py-2 pr-10"
+                      className="pr-10"
                       {...field}
                     />
                     <Button
                       type="button"
                       variant="ghost"
                       size="icon"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute top-0 right-0 h-10 w-10 hover:bg-transparent"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="absolute top-0 right-0 h-full w-10 hover:bg-transparent"
+                      aria-label={
+                        showPassword ? 'Hide password' : 'Show password'
+                      }
                     >
                       {showPassword ? (
-                        <EyeOff className="h-4 w-4 text-slate-600 opacity-50" />
+                        <EyeOff className="text-muted-foreground h-4 w-4" />
                       ) : (
-                        <Eye className="h-4 w-4 text-slate-600 opacity-50" />
+                        <Eye className="text-muted-foreground h-4 w-4" />
                       )}
                     </Button>
                   </div>
@@ -138,33 +149,24 @@ const LoginPage = () => {
             )}
           />
 
-          {/* Login Button */}
-          <Button
-            type="submit"
-            className="inline-flex h-10 items-center justify-center gap-1.5 self-stretch rounded-md bg-blue-600 px-4 py-2 hover:bg-blue-700"
-            disabled={form.formState.isSubmitting}
-          >
-            <span className="justify-center text-center font-['Archivo'] text-sm leading-tight font-medium text-slate-50">
-              {form.formState.isSubmitting ? 'Logging in...' : 'Login'}
-            </span>
+          <Button type="submit" className="mt-2 w-full" disabled={isSubmitting}>
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isSubmitting ? 'Logging in...' : 'Login'}
           </Button>
         </form>
       </Form>
 
-      {/* Footer Links */}
-      <div className="justify-center">
-        <span className="font-['Archivo'] text-sm leading-tight font-normal text-slate-600">
-          Belum punya akun?{' '}
+      <div className="mt-6 text-center text-sm">
+        <span className="text-muted-foreground">
+          Don&apos;t have an account?{' '}
         </span>
         <Link
           href="/auth/register"
-          className="font-['Archivo'] text-sm leading-tight font-normal text-blue-600 underline hover:text-blue-700"
+          className="text-primary font-semibold underline-offset-4 hover:underline"
         >
-          Daftar sekarang
+          Register now
         </Link>
       </div>
-    </>
+    </div>
   );
-};
-
-export default LoginPage;
+}

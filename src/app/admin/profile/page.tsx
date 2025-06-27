@@ -4,8 +4,10 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -14,24 +16,21 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-// Komponen Skeleton tidak lagi digunakan secara langsung di sini
-// import ProfilePageSkeleton from '@/components/common/feedback/ProfilePageSkeleton';
+import { User } from 'lucide-react';
 
-const UserProfilePage = () => {
+export default function AdminProfilePage() {
+  const { user, isLoading } = useAuth();
   const router = useRouter();
-  // Kita tetap membutuhkan 'user' untuk ditampilkan, tapi kita akan menyederhanakan penanganan 'isLoading'
-  const { user } = useAuth();
 
   const breadcrumbs = [
     { label: 'Dashboard', href: '/admin/articles' },
-    { label: 'User Profile' },
+    { label: 'My Profile' },
   ];
 
   return (
     <>
-      {/* Header Halaman (Judul & Breadcrumbs) */}
-      <div className="border-b border-slate-200 bg-white px-4 py-5 lg:px-6">
-        <h1 className="mb-3 text-xl leading-7 font-semibold text-slate-900">
+      <div className="border-b bg-white px-4 py-5 lg:px-6">
+        <h1 className="mb-3 text-xl font-semibold text-slate-900">
           My Profile
         </h1>
         <Breadcrumb>
@@ -54,42 +53,84 @@ const UserProfilePage = () => {
         </Breadcrumb>
       </div>
 
-      {/* Konten Utama Halaman */}
-      <main className="flex flex-1 items-start justify-center overflow-y-auto p-4 sm:p-6 lg:p-8">
-        <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-8">
-          <div className="flex flex-col items-center gap-6">
-            <div className="flex h-[68px] w-[68px] items-center justify-center rounded-full bg-blue-200">
-              <span className="text-3xl font-medium text-blue-900">
-                {user?.username.charAt(0).toUpperCase()}
-              </span>
-            </div>
-            <div className="w-full space-y-3">
-              <div className="flex items-center justify-between rounded-md bg-gray-100 p-3">
-                <span className="font-semibold text-gray-600">Username</span>
-                <span className="font-medium text-gray-900">
-                  {user?.username}
-                </span>
-              </div>
-              <div className="flex items-center justify-between rounded-md bg-gray-100 p-3">
-                <span className="font-semibold text-gray-600">Password</span>
-                <span className="font-mono text-gray-500">********</span>
-              </div>
-              <div className="flex items-center justify-between rounded-md bg-gray-100 p-3">
-                <span className="font-semibold text-gray-600">Role</span>
-                <span className="font-medium text-gray-900">{user?.role}</span>
+      <main className="flex flex-1 flex-col overflow-y-auto">
+        {isLoading ? (
+          // --- Skeleton UI ---
+          <div className="flex flex-1 items-center justify-center p-4">
+            <div className="w-full max-w-md space-y-6">
+              <div className="flex flex-col items-center gap-6">
+                <Skeleton className="h-20 w-20 rounded-full" />
+                <div className="w-full space-y-2 text-center">
+                  <Skeleton className="mx-auto h-7 w-40" />
+                  <Skeleton className="mx-auto h-4 w-20" />
+                </div>
+                <div className="w-full space-y-3 border-t pt-6">
+                  <Skeleton className="h-12 w-full rounded-md" />
+                  <Skeleton className="h-12 w-full rounded-md" />
+                </div>
+                <Skeleton className="h-10 w-full rounded-md" />
               </div>
             </div>
-            <Button
-              onClick={() => router.push('/admin/articles')}
-              className="mt-4 w-full"
-            >
-              Back to Dashboard
+          </div>
+        ) : !user ? (
+          // --- User Not Found UI ---
+          <div className="flex flex-1 flex-col items-center justify-center text-center">
+            <User className="text-muted-foreground h-12 w-12" />
+            <h2 className="mt-4 text-2xl font-semibold">
+              Could Not Load Profile
+            </h2>
+            <p className="text-muted-foreground mt-2">
+              Please try logging in again to view your profile.
+            </p>
+            <Button onClick={() => router.push('/auth/login')} className="mt-6">
+              Go to Login
             </Button>
           </div>
-        </div>
+        ) : (
+          // --- Main Profile UI ---
+          <div className="flex flex-1 items-center justify-center p-4">
+            <div className="w-full max-w-md rounded-xl border bg-white p-8 shadow-sm">
+              <div className="flex flex-col items-center gap-6">
+                <Avatar className="h-20 w-20">
+                  <AvatarFallback className="bg-primary/10 text-primary text-3xl font-semibold">
+                    {user.username.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="w-full space-y-3 text-center">
+                  <h2 className="text-2xl font-bold">{user.username}</h2>
+                  <p className="text-muted-foreground text-sm font-medium">
+                    {user.role}
+                  </p>
+                </div>
+                <div className="w-full space-y-3 border-t pt-6">
+                  <div className="bg-muted/50 flex items-center justify-between rounded-md p-3">
+                    <span className="text-muted-foreground font-semibold">
+                      Username
+                    </span>
+                    <span className="text-foreground font-mono">
+                      {user.username}
+                    </span>
+                  </div>
+                  <div className="bg-muted/50 flex items-center justify-between rounded-md p-3">
+                    <span className="text-muted-foreground font-semibold">
+                      Password
+                    </span>
+                    <span className="text-muted-foreground font-mono">
+                      ********
+                    </span>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => router.push('/admin/articles')}
+                  className="mt-4 w-full"
+                >
+                  Back to Dashboard
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </>
   );
-};
-
-export default UserProfilePage;
+}

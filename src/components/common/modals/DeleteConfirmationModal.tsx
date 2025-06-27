@@ -1,6 +1,8 @@
+// src/components/common/modals/DeleteConfirmationModal.tsx
+
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -10,7 +12,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Trash2 } from 'lucide-react';
+import { Loader2, Trash2 } from 'lucide-react';
 
 interface DeleteConfirmationModalProps {
   isOpen: boolean;
@@ -33,41 +35,77 @@ export default function DeleteConfirmationModal({
   itemType = 'item',
   isLoading = false,
 }: DeleteConfirmationModalProps) {
+  // 1. Ref untuk tombol konfirmasi agar bisa difokuskan secara otomatis
+  const confirmButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      // Fokuskan tombol konfirmasi saat modal terbuka untuk UX keyboard yang lebih baik
+      setTimeout(() => confirmButtonRef.current?.focus(), 100);
+    }
+  }, [isOpen]);
+
+  // 2. Logika deskripsi disederhanakan dan dipindahkan ke dalam JSX
   const defaultTitle = `Delete ${itemType}`;
-  const defaultDescription = itemName
-    ? `Are you sure you want to delete "${itemName}"? This action cannot be undone.`
-    : `Are you sure you want to delete this ${itemType}? This action cannot be undone.`;
+  const defaultDescription = `Are you sure you want to delete this ${itemType}? This action cannot be undone.`;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="mx-4 sm:max-w-[425px]">
-        <DialogHeader>
-          <div className="mb-2 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
-              <Trash2 className="h-5 w-5 text-red-600" />
-            </div>
-            <DialogTitle className="text-lg font-semibold text-gray-900">
+      <DialogContent
+        className="sm:max-w-md"
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogHeader className="flex flex-row items-start gap-4">
+          <div className="bg-destructive/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full">
+            <Trash2 className="text-destructive h-5 w-5" />
+          </div>
+          <div className="space-y-1">
+            <DialogTitle id="delete-dialog-title" className="text-lg">
               {title || defaultTitle}
             </DialogTitle>
+            <DialogDescription
+              id="delete-dialog-description"
+              className="text-muted-foreground"
+            >
+              {description ? (
+                description
+              ) : (
+                <>
+                  {itemName ? (
+                    <>
+                      Are you sure you want to delete{' '}
+                      <strong>&quot;{itemName}&quot;</strong>?
+                    </>
+                  ) : (
+                    defaultDescription
+                  )}
+                </>
+              )}
+            </DialogDescription>
           </div>
-          <DialogDescription className="text-left text-sm text-gray-600">
-            {description || defaultDescription}
-          </DialogDescription>
         </DialogHeader>
-        <DialogFooter className="mt-6 gap-3">
+        {/* 3. Layout footer yang lebih responsif dan tombol yang lebih deskriptif */}
+        <DialogFooter className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Button
+            type="button"
             variant="outline"
             onClick={onClose}
-            className="flex-1"
             disabled={isLoading}
           >
             Cancel
           </Button>
           <Button
+            ref={confirmButtonRef}
+            type="button"
+            variant="destructive"
             onClick={onConfirm}
-            className="flex-1 bg-red-600 text-white hover:bg-red-700"
             disabled={isLoading}
+            className="min-w-[120px]"
           >
+            {isLoading ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : null}
             {isLoading ? 'Deleting...' : `Delete ${itemType}`}
           </Button>
         </DialogFooter>

@@ -1,4 +1,5 @@
-// app/user/articles/page.tsx
+// src/app/user/articles/page.tsx
+
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -6,6 +7,7 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { debounce } from 'lodash';
 import { toast } from 'sonner';
 import Image from 'next/image';
+import Link from 'next/link';
 import { ArrowRight, Search } from 'lucide-react';
 
 import { Card } from '@/components/ui/card';
@@ -21,9 +23,8 @@ import {
 import Pagination from '@/components/common/feedback/Pagination';
 import { Skeleton } from '@/components/ui/skeleton';
 import axiosInstance from '@/lib/api/axios';
-import Link from 'next/link';
 
-// Tipe data untuk artikel dan kategori sesuai API
+// --- Type Definitions ---
 interface Article {
   id: string;
   title: string;
@@ -41,15 +42,130 @@ interface Category {
   name: string;
 }
 
-// Komponen Skeleton untuk kartu artikel
+// 1. Helper function di luar komponen untuk efisiensi
+const truncateDescription = (htmlContent: string, maxLength: number) => {
+  const plainText = htmlContent.replace(/<[^>]*>?/gm, '');
+  if (plainText.length <= maxLength) {
+    return plainText;
+  }
+  return `${plainText.substring(0, maxLength)}...`;
+};
+
+// --- Sub-Components for Readability and Reusability ---
+
+// 2. Komponen untuk Hero Section
+const ArticlePageHeader = ({
+  categories,
+  categoryFilter,
+  searchTerm,
+  isLoadingCategories,
+  onCategoryChange,
+  onSearchChange,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+}: any) => (
+  <header className="relative overflow-hidden bg-blue-600/90 py-16 sm:py-24">
+    <div className="container mx-auto max-w-4xl px-4 text-center">
+      <div className="space-y-4">
+        <p className="font-semibold text-white">Our Latest Insights</p>
+        <h1 className="text-4xl leading-tight font-bold text-white sm:text-5xl">
+          The Journal: Resources & News
+        </h1>
+        <p className="text-xl text-blue-100 sm:text-2xl">
+          Your daily dose of design insights!
+        </p>
+      </div>
+      <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <Select
+          onValueChange={onCategoryChange}
+          defaultValue={categoryFilter || 'all'}
+          disabled={isLoadingCategories}
+        >
+          <SelectTrigger className="w-full bg-white sm:w-[200px]">
+            <SelectValue placeholder="Select category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            {/* FIX: Filter out categories with empty string IDs */}
+            {categories
+              .filter((cat: Category) => cat.id && cat.id.trim() !== '')
+              .map((cat: Category) => (
+                <SelectItem key={cat.id} value={cat.id}>
+                  {cat.name}
+                </SelectItem>
+              ))}
+          </SelectContent>
+        </Select>
+        <div className="relative w-full sm:w-auto">
+          <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+          <Input
+            placeholder="Search articles..."
+            className="w-full bg-white pl-10 sm:w-80"
+            type="search"
+            aria-label="Search articles"
+            defaultValue={searchTerm}
+            onChange={onSearchChange}
+          />
+        </div>
+      </div>
+    </div>
+  </header>
+);
+
+// 3. Komponen untuk Kartu Artikel
+const ArticleCard = ({ article }: { article: Article }) => (
+  <Card className="flex h-full flex-col overflow-hidden transition-shadow hover:shadow-lg">
+    <Link href={`/user/articles/${article.id}`} className="block">
+      <div className="relative aspect-[2/1] bg-gray-200">
+        <Image
+          src={article.imageUrl || 'https://placehold.co/400x200/e2e8f0/e2e8f0'}
+          alt={article.title}
+          fill
+          className="object-cover"
+        />
+      </div>
+    </Link>
+    <div className="flex flex-1 flex-col p-6">
+      <p className="text-primary mb-2 text-sm font-semibold">
+        {article.category.name}
+      </p>
+      <h3 className="mb-2 text-xl leading-snug font-bold">{article.title}</h3>
+      <p className="text-muted-foreground mb-4 flex-grow">
+        {truncateDescription(article.content, 100)}
+      </p>
+      <div className="mt-auto flex items-center justify-between">
+        <span className="text-muted-foreground text-sm">
+          {new Date(article.createdAt).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })}
+        </span>
+        <Link href={`/user/articles/${article.id}`}>
+          <Button
+            variant="ghost"
+            size="sm"
+            aria-label={`Read more about ${article.title}`}
+          >
+            Read More <ArrowRight className="ml-1 h-4 w-4" />
+          </Button>
+        </Link>
+      </div>
+    </div>
+  </Card>
+);
+
+// 4. Komponen Skeleton yang lebih akurat
 const ArticleCardSkeleton = () => (
-  <Card className="overflow-hidden">
-    <Skeleton className="h-48 w-full" />
-    <div className="p-6">
+  <Card className="flex h-full flex-col overflow-hidden">
+    <Skeleton className="aspect-[2/1] w-full" />
+    <div className="flex flex-1 flex-col p-6">
       <Skeleton className="mb-2 h-4 w-1/4" />
-      <Skeleton className="mb-2 h-6 w-full" />
-      <Skeleton className="mb-4 h-10 w-full" />
-      <div className="flex items-center justify-between">
+      <Skeleton className="mb-2 h-6 w-3/4" />
+      <div className="my-4 flex-grow space-y-2">
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-5/6" />
+      </div>
+      <div className="mt-auto flex items-center justify-between">
         <Skeleton className="h-4 w-1/3" />
         <Skeleton className="h-9 w-24" />
       </div>
@@ -62,249 +178,111 @@ export default function ArticlesUserPage() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // State untuk menyimpan data dari API
   const [articles, setArticles] = useState<Article[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
-  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
 
   // Mengambil parameter dari URL
   const currentPage = Number(searchParams.get('page')) || 1;
   const searchTerm = searchParams.get('search') || '';
   const categoryFilter = searchParams.get('category') || '';
 
-  // Fungsi untuk membuat query string URL
-  const createQueryString = useCallback(
-    (name: string, value: string) => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (value) {
-        params.set(name, value);
-      } else {
-        params.delete(name);
-      }
-      if (name !== 'page') {
-        params.delete('page');
-      }
-      return params.toString();
-    },
-    [searchParams],
-  );
-
-  // Fungsi untuk mengambil data artikel
-  const fetchArticles = useCallback(async () => {
-    setIsLoading(true);
-    const limit = 9; // Kembali ke 10 sesuai permintaan Anda
-    try {
-      const params = new URLSearchParams({
-        page: String(currentPage),
-        limit: String(limit),
-      });
-      if (searchTerm) params.set('search', searchTerm);
-      if (categoryFilter) params.set('category', categoryFilter);
-
-      const response = await axiosInstance.get(
-        `/articles?${params.toString()}`,
-      );
-
-      const responseData = response.data.data || [];
-      setArticles(responseData);
-
-      const totalData = response.data.total || 0;
-      setTotalPages(Math.ceil(totalData / limit));
-    } catch (error) {
-      toast.error('Gagal memuat artikel.');
-      console.error('Failed to fetch articles:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentPage, searchTerm, categoryFilter]);
-
-  // Fungsi untuk mengambil data kategori
-  useEffect(() => {
-    const fetchCategories = async () => {
-      setIsLoadingCategories(true);
+  // 5. Logika fetching yang lebih terpusat
+  const fetchPageData = useCallback(
+    async (page: number, search: string, category: string) => {
+      setIsLoading(true);
       try {
-        const response = await axiosInstance.get('/categories');
-        setCategories(response.data.data);
+        const articlesPromise = axiosInstance.get('/articles', {
+          params: { page, limit: 9, search, category },
+        });
+        const categoriesPromise = axiosInstance.get('/categories');
+
+        const [articlesResponse, categoriesResponse] = await Promise.all([
+          articlesPromise,
+          categoriesPromise,
+        ]);
+
+        setArticles(articlesResponse.data.data || []);
+        setTotalPages(articlesResponse.data.totalPages || 1);
+        setCategories(categoriesResponse.data.data || []);
       } catch (error) {
-        toast.error('Gagal memuat kategori.');
-        console.error('Failed to fetch categories:', error);
+        toast.error('Failed to load page data.');
+        console.error('Failed to fetch page data:', error);
       } finally {
-        setIsLoadingCategories(false);
+        setIsLoading(false);
       }
-    };
-    fetchCategories();
-  }, []);
-
-  // Memanggil fetchArticles setiap kali parameter URL berubah
-  useEffect(() => {
-    fetchArticles();
-  }, [fetchArticles]);
-
-  // Handler untuk pencarian dengan debounce
-  const debouncedSearch = useCallback(
-    debounce((value: string) => {
-      router.push(`${pathname}?${createQueryString('search', value)}`);
-    }, 500),
-    [createQueryString, pathname, router],
+    },
+    [],
   );
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    debouncedSearch(e.target.value);
-  };
+  useEffect(() => {
+    fetchPageData(currentPage, searchTerm, categoryFilter);
+  }, [currentPage, searchTerm, categoryFilter, fetchPageData]);
 
-  // Handler untuk filter kategori
-  const handleCategoryChange = (value: string) => {
-    const newCategory = value === 'all' ? '' : value;
-    router.push(`${pathname}?${createQueryString('category', newCategory)}`);
-  };
-
-  // --- PERBAIKAN DI SINI ---
-  // Fungsi untuk menghapus HTML dan memotong deskripsi
-  const truncateDescription = (htmlContent: string, maxLength: number) => {
-    // 1. Hapus semua tag HTML
-    const plainText = htmlContent.replace(/<[^>]*>?/gm, '');
-
-    // 2. Potong teks jika lebih panjang dari maxLength
-    if (plainText.length <= maxLength) {
-      return plainText;
+  const handleFilterChange = (key: 'search' | 'category', value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set(key, value);
+    params.set('page', '1'); // Selalu reset ke halaman 1 saat filter berubah
+    if (!value || value === 'all') {
+      params.delete(key);
     }
-    return plainText.substring(0, maxLength) + '...';
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const debouncedSearch = useCallback(
+    debounce((value: string) => handleFilterChange('search', value), 500),
+    [],
+  );
+  const handlePageChange = (page: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('page', String(page));
+    router.push(`${pathname}?${params.toString()}`);
   };
 
   return (
     <>
-      <div className="relative h-[500px] overflow-hidden bg-blue-600/90">
-        <div className="mx-auto max-w-4xl px-4 py-12 text-center">
-          <div className="space-y-6">
-            <div className="space-y-3">
-              <div className="text-base font-bold text-white">Blog genzet</div>
-              <h1 className="text-5xl leading-tight font-medium text-white">
-                The Journal : Design Resources,
-                <br />
-                Interviews, and Industry News
-              </h1>
-              <p className="text-2xl text-white">
-                Your daily dose of design insights!
-              </p>
-            </div>
-            <div className="flex items-center justify-center gap-2">
-              <Select
-                onValueChange={handleCategoryChange}
-                defaultValue={categoryFilter || 'all'}
-                disabled={isLoadingCategories}
-              >
-                <SelectTrigger className="w-[200px] bg-white">
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {categories
-                    .filter((cat) => cat && cat.id && cat.id.trim() !== '')
-                    .map((cat) => (
-                      <SelectItem key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-              <div className="relative">
-                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
-                <Input
-                  placeholder="Search articles..."
-                  className="w-96 bg-white pl-10"
-                  type="search"
-                  aria-label="Search articles"
-                  defaultValue={searchTerm}
-                  onChange={handleSearchChange}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ArticlePageHeader
+        categories={categories}
+        categoryFilter={categoryFilter}
+        searchTerm={searchTerm}
+        isLoadingCategories={isLoading && categories.length === 0}
+        onCategoryChange={(value: string) =>
+          handleFilterChange('category', value)
+        }
+        onSearchChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          debouncedSearch(e.target.value)
+        }
+      />
 
-      {/* Articles Grid */}
-      <div className="mx-auto max-w-7xl px-4 py-16">
+      <section className="container mx-auto max-w-7xl px-4 py-12 sm:py-16">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {isLoading
             ? Array.from({ length: 9 }).map((_, i) => (
                 <ArticleCardSkeleton key={i} />
               ))
             : articles.map((article) => (
-                <Card key={article.id} className="overflow-hidden">
-                  <Link
-                    href={`/user/articles/${article.id}`}
-                    className="block h-48 bg-gray-200"
-                  >
-                    <Image
-                      src={
-                        article.imageUrl ||
-                        'https://placehold.co/400x192/e2e8f0/e2e8f0'
-                      }
-                      alt={article.title}
-                      width={400}
-                      height={192}
-                      className="h-full w-full object-cover"
-                    />
-                  </Link>
-                  <div className="p-6">
-                    <div className="mb-2 text-sm text-blue-600">
-                      {article.category.name}
-                    </div>
-                    <h3 className="mb-2 text-xl font-semibold">
-                      {article.title}
-                    </h3>
-                    <p className="mb-4 text-gray-600">
-                      {truncateDescription(article.content, 100)}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500">
-                        {new Date(article.createdAt).toLocaleDateString(
-                          'en-US',
-                          {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                          },
-                        )}
-                      </span>
-                      <Link href={`/user/articles/${article.id}`}>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          aria-label={`Read more about ${article.title}`}
-                        >
-                          Read More <ArrowRight className="ml-1 h-4 w-4" />
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                </Card>
+                <ArticleCard key={article.id} article={article} />
               ))}
         </div>
+
         {!isLoading && articles.length === 0 && (
           <div className="col-span-full py-16 text-center">
-            <h3 className="text-xl font-semibold">No Articles Found</h3>
-            <p className="text-gray-500">
-              Try adjusting your search or filters.
+            <h3 className="text-2xl font-semibold">No Articles Found</h3>
+            <p className="text-muted-foreground mt-2">
+              Try adjusting your search or filters to find what you&apos;re
+              looking for.
             </p>
           </div>
         )}
-      </div>
+      </section>
 
-      {/* Pagination */}
       {totalPages > 1 && (
-        <div className="mt-12 mb-16">
+        <div className="pb-16">
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
-            onPageChange={(page) =>
-              router.push(
-                `${pathname}?${createQueryString('page', String(page))}`,
-              )
-            }
+            onPageChange={handlePageChange}
           />
         </div>
       )}

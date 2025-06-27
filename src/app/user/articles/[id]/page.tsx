@@ -1,19 +1,21 @@
-// app/user/articles/[id]/page.tsx
+// src/app/user/articles/[id]/page.tsx
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { toast } from 'sonner';
+import Link from 'next/link';
 import Image from 'next/image';
+import { toast } from 'sonner';
+import { ArrowLeft } from 'lucide-react';
+
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import ArticleContent from '@/components/layouts/ArticleContentLayout';
 import { Skeleton } from '@/components/ui/skeleton';
 import axiosInstance from '@/lib/api/axios';
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
 
-// Tipe data untuk artikel tunggal (detail)
+// --- Type Definitions ---
 interface ArticleDetail {
   id: string;
   title: string;
@@ -29,84 +31,139 @@ interface ArticleDetail {
   };
 }
 
-// Tipe data untuk artikel terkait (lebih ringkas)
 interface RelatedArticle {
   id: string;
   title: string;
   imageUrl: string | null;
-  content: string; // Tetap perlukan content untuk deskripsi singkat
+  content: string;
 }
 
-// Komponen Skeleton untuk halaman detail
+// 1. Helper function dipindahkan ke luar komponen
+const stripHtml = (html: string) => {
+  return html.replace(/<[^>]*>?/gm, '');
+};
+
+// --- Sub-Components for Readability and Reusability ---
+
+// 2. Komponen untuk Header Artikel
+const ArticleHeader = ({ article }: { article: ArticleDetail }) => (
+  <div className="space-y-4 text-center">
+    <div className="text-muted-foreground flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm">
+      <span className="bg-primary/10 text-primary rounded-full px-3 py-1 font-medium">
+        {article.category.name}
+      </span>
+      <span>
+        Published on{' '}
+        {new Date(article.createdAt).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })}
+      </span>
+      <span>By {article.user.username}</span>
+    </div>
+    <h1 className="text-3xl leading-tight font-bold text-gray-900 md:text-4xl">
+      {article.title}
+    </h1>
+  </div>
+);
+
+// 3. Komponen untuk Kartu Artikel Terkait
+const RelatedArticleCard = ({ article }: { article: RelatedArticle }) => (
+  <Card className="overflow-hidden transition-shadow hover:shadow-md">
+    <Link
+      href={`/user/articles/${article.id}`}
+      className="flex h-full flex-col"
+    >
+      <div className="relative aspect-video bg-gray-200">
+        <Image
+          src={article.imageUrl || 'https://placehold.co/333x187/e2e8f0/e2e8f0'}
+          alt={article.title}
+          fill
+          className="object-cover"
+        />
+      </div>
+      <div className="flex flex-1 flex-col p-4">
+        <h3 className="mb-2 font-semibold">{article.title}</h3>
+        <p className="text-muted-foreground mb-3 line-clamp-2 flex-grow text-sm">
+          {stripHtml(article.content).substring(0, 80)}...
+        </p>
+        <div className="text-primary mt-auto text-sm font-semibold">
+          Read More
+        </div>
+      </div>
+    </Link>
+  </Card>
+);
+
+// 4. Komponen Skeleton yang lebih akurat untuk mengurangi CLS
 const DetailArticleSkeleton = () => (
-  <div className="mx-auto max-w-4xl px-4 py-12">
+  <div className="container mx-auto max-w-4xl px-4 py-12">
     <article className="space-y-8">
       <div className="space-y-4 text-center">
         <div className="flex items-center justify-center gap-4">
           <Skeleton className="h-6 w-24 rounded-full" />
-          <Skeleton className="h-4 w-32" />
-          <Skeleton className="h-4 w-28" />
+          <Skeleton className="h-4 w-32 rounded" />
         </div>
-        <Skeleton className="mx-auto h-10 w-3/4" />
-        <Skeleton className="mx-auto h-8 w-1/2" />
+        <Skeleton className="mx-auto h-10 w-3/4 rounded" />
       </div>
-      <Skeleton className="h-96 w-full rounded-xl" />
-      <div className="space-y-4">
-        <Skeleton className="h-6 w-full" />
-        <Skeleton className="h-6 w-full" />
-        <Skeleton className="h-6 w-5/6" />
+      <Skeleton className="aspect-video w-full rounded-xl" />
+      <div className="space-y-4 pt-4">
+        <Skeleton className="h-5 w-full rounded" />
+        <Skeleton className="h-5 w-full rounded" />
+        <Skeleton className="h-5 w-5/6 rounded" />
       </div>
     </article>
   </div>
 );
 
-export default function DetailArticle() {
+// Komponen utama
+export default function DetailArticlePage() {
   const params = useParams();
   const router = useRouter();
-  const { id } = params;
+  const id = params.id as string;
 
   const [article, setArticle] = useState<ArticleDetail | null>(null);
   const [relatedArticles, setRelatedArticles] = useState<RelatedArticle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // --- Fungsi untuk menghapus tag HTML ---
-  const stripHtml = (html: string) => {
-    return html.replace(/<[^>]*>?/gm, '');
-  };
-
+  // 5. Logika fetching yang lebih efisien
   useEffect(() => {
     if (!id) return;
 
     const fetchArticleDetails = async () => {
       setIsLoading(true);
       try {
-        const articleRes = await axiosInstance.get(`/articles/${id}`);
-        const mainArticle: ArticleDetail = articleRes.data;
+        const articleRes = await axiosInstance.get<ArticleDetail>(
+          `/articles/${id}`,
+        );
+        const mainArticle = articleRes.data;
         setArticle(mainArticle);
 
+        // Setelah artikel utama didapat, fetch artikel terkait
         if (mainArticle.category.id) {
-          const relatedRes = await axiosInstance.get('/articles', {
-            params: {
-              category: mainArticle.category.id,
-              limit: 4,
-            },
+          const relatedRes = await axiosInstance.get<{
+            data: RelatedArticle[];
+          }>('/articles', {
+            params: { category: mainArticle.category.id, limit: 4 },
           });
-          const allRelated: RelatedArticle[] = relatedRes.data.data;
-          const filteredRelated = allRelated
+          const filteredRelated = (relatedRes.data.data || [])
             .filter((a) => a.id !== mainArticle.id)
             .slice(0, 3);
           setRelatedArticles(filteredRelated);
         }
       } catch (error) {
-        toast.error('Gagal memuat artikel.');
+        toast.error('Failed to load article.');
         console.error('Failed to fetch article details:', error);
+        // Jika artikel tidak ditemukan, arahkan kembali
+        router.push('/user/articles');
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchArticleDetails();
-  }, [id]);
+  }, [id, router]);
 
   if (isLoading) {
     return <DetailArticleSkeleton />;
@@ -115,97 +172,47 @@ export default function DetailArticle() {
   if (!article) {
     return (
       <div className="flex h-screen flex-col items-center justify-center text-center">
-        <h2 className="text-2xl font-semibold">Artikel tidak ditemukan</h2>
-        <p className="text-gray-500">
-          Artikel yang Anda cari mungkin telah dihapus atau tidak ada.
+        <h2 className="text-2xl font-semibold">Article not found</h2>
+        <p className="text-muted-foreground">
+          The article you are looking for may have been removed.
         </p>
         <Button onClick={() => router.push('/user/articles')} className="mt-4">
-          Kembali ke Daftar Artikel
+          Back to Articles
         </Button>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12">
+    <div className="container mx-auto max-w-4xl px-4 py-12">
       <article className="space-y-8">
-        {/* Article Meta */}
-        <div className="space-y-4 text-center">
-          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-gray-500">
-            <span className="rounded-full bg-blue-100 px-3 py-1 text-blue-600">
-              {article.category.name}
-            </span>
-            <span>
-              Published on{' '}
-              {new Date(article.createdAt).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
-            </span>
-            <span>By {article.user.username}</span>
-          </div>
+        <ArticleHeader article={article} />
 
-          <h1 className="text-4xl leading-tight font-bold text-gray-900">
-            {article.title}
-          </h1>
-        </div>
-
-        {/* Article Image */}
-        <div className="h-96 w-full overflow-hidden rounded-xl bg-gray-200">
+        <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-gray-200">
           <Image
             src={
-              article.imageUrl || 'https://placehold.co/1120x480/e2e8f0/e2e8f0'
+              article.imageUrl || 'https://placehold.co/1120x630/e2e8f0/e2e8f0'
             }
             alt={article.title}
-            width={1120}
-            height={480}
-            className="h-full w-full object-cover"
+            fill
+            className="object-cover"
             priority
           />
         </div>
 
-        {/* Article Body */}
-        <ArticleContent content={article.content} className="space-y-6" />
+        <ArticleContent content={article.content} />
 
-        {/* Related Articles */}
         {relatedArticles.length > 0 && (
-          <div className="mt-12 border-t pt-8">
+          <section className="mt-12 border-t pt-8">
             <h2 className="mb-6 text-2xl font-semibold">Related Articles</h2>
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
               {relatedArticles.map((related) => (
-                <Card key={related.id} className="overflow-hidden">
-                  <Link href={`/user/articles/${related.id}`}>
-                    <div className="h-48 bg-gray-200">
-                      <Image
-                        src={
-                          related.imageUrl ||
-                          'https://placehold.co/333x240/e2e8f0/e2e8f0'
-                        }
-                        alt={related.title}
-                        width={333}
-                        height={240}
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                    <div className="p-4">
-                      <h3 className="mb-2 font-semibold">{related.title}</h3>
-                      {/* --- PERBAIKAN DI SINI --- */}
-                      <p className="mb-3 line-clamp-2 text-sm text-gray-600">
-                        {stripHtml(related.content).substring(0, 100)}...
-                      </p>
-                      <Button variant="ghost" size="sm" className="h-auto p-0">
-                        Read More
-                      </Button>
-                    </div>
-                  </Link>
-                </Card>
+                <RelatedArticleCard key={related.id} article={related} />
               ))}
             </div>
-          </div>
+          </section>
         )}
 
-        {/* Back to Articles */}
         <div className="pt-8 text-center">
           <Button
             variant="outline"
