@@ -76,7 +76,7 @@ export default function Sidebar({ isMobile = false }: SidebarProps) {
       >
         <div className="flex items-center justify-center border-b border-blue-500 p-6">
           <Image
-            src="/Logo.svg"
+            src="/logo.svg"
             alt="Content Flow Logo"
             width={134}
             height={24}

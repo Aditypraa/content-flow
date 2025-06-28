@@ -5,6 +5,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils'; // 1. Impor cn untuk konsistensi
+import logoBiru from '@/assets/logobiru.svg';
 
 export default function AuthLayout({
   children,
@@ -21,7 +22,7 @@ export default function AuthLayout({
         {/* Logo */}
         <div className="mx-auto mb-6 flex justify-center">
           <Image
-            src="/LogoBiru.svg"
+            src={logoBiru}
             alt="Content Flow Logo"
             width={134}
             height={24}

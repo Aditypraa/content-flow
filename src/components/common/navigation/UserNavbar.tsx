@@ -124,7 +124,7 @@ export default function UserNavbar() {
             aria-label="Go to homepage"
           >
             <Image
-              src="/Logo.svg"
+              src="/logo.svg"
               alt="Content Flow Logo"
               width={134}
               height={24}

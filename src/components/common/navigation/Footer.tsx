@@ -12,7 +12,7 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-4">
         <div className="flex flex-col items-center space-y-4">
           <Image
-            src="/Logo.svg"
+            src="/logo.svg"
             alt="Logo"
             width={134}
             height={24}
